@@ -1,5 +1,5 @@
 async function getData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/detalle`, { cache: "no-store" });
+  const res = await fetch(`${process.env.API_URL}/detalle`, { cache: "no-store" });
   return res.json();
 }
 

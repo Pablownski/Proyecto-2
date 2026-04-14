@@ -1,5 +1,5 @@
 async function getData() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/clientes-top`, { cache: "no-store" });
+  const res = await fetch(`${process.env.API_URL}/ranking`, { cache: "no-store" });
   return res.json();
 }
 
@@ -8,11 +8,11 @@ export default async function Page() {
 
   return (
     <div>
-      <h2>Clientes Top</h2>
+      <h2>Ranking Productos</h2>
       <table border={1}>
         <thead>
           <tr>
-            <th>Cliente</th><th>Total Gastado</th>
+            <th>Producto</th><th>Total Vendido</th>
           </tr>
         </thead>
         <tbody>

@@ -1,5 +1,7 @@
 avances.docx
 
+.env
 
 
-
+node_modules
+.next

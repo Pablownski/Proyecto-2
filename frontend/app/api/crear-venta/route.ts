@@ -1,5 +1,5 @@
 export async function POST() {
-  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/venta`, {
+  await fetch(`${process.env.API_URL}/venta`, {
     method: "POST"
   });
 
