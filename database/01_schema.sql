@@ -56,3 +56,11 @@ CREATE TABLE detalle_venta (
     FOREIGN KEY (product_id) REFERENCES producto(product_id),
     UNIQUE (sale_id, product_id)
 );
+
+
+
+ALTER TABLE producto
+ADD CONSTRAINT chk_stock CHECK (stock >= 0);
+
+ALTER TABLE detalle_venta
+ADD CONSTRAINT chk_quantity CHECK (quantity > 0);
