@@ -9,7 +9,7 @@ export default async function Page() {
   const data = await getData();
   return (
     <>
-      <h1>⭐ Top Productos</h1>
+      <h1>Top Productos</h1>
       <div className="alert alert-warn" style={{ marginBottom: '1rem' }}>
         <strong>Subquery con IN:</strong> productos cuyo total vendido supera 5 unidades.
         <br />
@@ -39,7 +39,7 @@ export default async function Page() {
                     <span className="badge badge-blue">{r[1]} uds.</span>
                   </td>
                   <td style={{ color: '#059669', fontWeight: 600 }}>
-                    ✅ Sí ({r[1]} &gt; 5)
+                    Sí ({r[1]} &gt; 5)
                   </td>
                 </tr>
               ))}
