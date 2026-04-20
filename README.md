@@ -37,7 +37,7 @@ El `.env` dentro ya contiene las credenciales de desarrollo. Para cambiarlas en 
 ```bash
 # PostgreSQL Database
 POSTGRES_USER=proy2              # Usuario de la DB
-POSTGRES_PASSWORD=secret         # Contraseña (⚠️ cambiar en producción)
+POSTGRES_PASSWORD=secret         # Contraseña 
 POSTGRES_DB=tienda              # Nombre de la base de datos
 
 # Backend
