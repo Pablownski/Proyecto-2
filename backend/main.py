@@ -22,6 +22,94 @@ class ProductoIn(BaseModel):
     category_id: int
     supplier_id: int
 
+class LoginIn(BaseModel):
+    username: str
+    password: str
+
+class RegisterIn(BaseModel):
+    username: str
+    password: str
+
+# ── AUTH ───────────────────────────────────────────────────────────────────────
+
+@app.post("/auth/login")
+def auth_login(data: LoginIn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT user_id FROM usuario WHERE username=%s AND password_hash=crypt(%s, password_hash);",
+            (data.username, data.password)
+        )
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
+        user_id = row[0]
+        cursor.execute("INSERT INTO sesion (user_id) VALUES (%s) RETURNING token::text;", (user_id,))
+        token = cursor.fetchone()[0]
+        conn.commit()
+        return {"token": token, "username": data.username}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.post("/auth/logout")
+def auth_logout(token: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("DELETE FROM sesion WHERE token=%s::uuid;", (token,))
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+@app.post("/auth/register")
+def auth_register(data: RegisterIn):
+    if not data.username.strip():
+        raise HTTPException(status_code=400, detail="El nombre de usuario no puede estar vacío")
+    if len(data.password) < 6:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO usuario (username, password_hash) VALUES (%s, crypt(%s, gen_salt('bf', 12))) RETURNING user_id;",
+            (data.username.strip(), data.password)
+        )
+        user_id = cursor.fetchone()[0]
+        cursor.execute("INSERT INTO sesion (user_id) VALUES (%s) RETURNING token::text;", (user_id,))
+        token = cursor.fetchone()[0]
+        conn.commit()
+        return {"token": token, "username": data.username.strip()}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        if "unique" in str(e).lower():
+            raise HTTPException(status_code=409, detail="El nombre de usuario ya está en uso")
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+@app.get("/auth/verify")
+def auth_verify(token: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT u.username FROM sesion s JOIN usuario u ON s.user_id=u.user_id WHERE s.token=%s::uuid;",
+        (token,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    if not row:
+        raise HTTPException(status_code=401, detail="Sesión inválida")
+    return {"username": row[0]}
+
 # ── JOIN 1 ─────────────────────────────────────────────────────────────────────
 @app.get("/ventas")
 def get_ventas():
