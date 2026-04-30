@@ -12,7 +12,7 @@ export default function LoginPage({ searchParams }: { searchParams: SP }) {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
       <div className="card" style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>🏪</div>
+          <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}></div>
           <h1 style={{ marginBottom: '.25rem' }}>Tienda de Cuchito</h1>
           <p style={{ color: 'var(--muted)', fontSize: '.875rem' }}>Ingresa tus credenciales para continuar</p>
         </div>
