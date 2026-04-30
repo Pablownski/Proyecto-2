@@ -35,10 +35,10 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
       </div>
 
       {searchParams.success && (
-        <div className="alert alert-success">✅ {decodeURIComponent(searchParams.success)}</div>
+        <div className="alert alert-success"> {decodeURIComponent(searchParams.success)}</div>
       )}
       {searchParams.error && (
-        <div className="alert alert-error">❌ {decodeURIComponent(searchParams.error)}</div>
+        <div className="alert alert-error"> {decodeURIComponent(searchParams.error)}</div>
       )}
 
       {/* ── FORM CREAR ── */}

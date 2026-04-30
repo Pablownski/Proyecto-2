@@ -35,7 +35,7 @@ export default function RegistroForm({ serverError }: { serverError?: string }) 
     <form action="/api/auth/registro" method="post" onSubmit={handleSubmit}>
       {error && (
         <div className="alert alert-error" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '.5rem' }}>
-          <span style={{ fontSize: '1rem', flexShrink: 0 }}>❌</span>
+          <span style={{ fontSize: '1rem', flexShrink: 0 }}></span>
           <span>{error}</span>
         </div>
       )}
