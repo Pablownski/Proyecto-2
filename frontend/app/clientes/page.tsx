@@ -1,12 +1,20 @@
 export const dynamic = 'force-dynamic';
 
-async function getData() {
-  const res = await fetch(`${process.env.API_URL}/clientes-top`, { cache: 'no-store' });
-  return res.json();
+import ErrorCard from '../components/ErrorCard';
+
+async function getData(): Promise<any[] | null> {
+  try {
+    const res = await fetch(`${process.env.API_URL}/clientes-top`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export default async function Page() {
   const data = await getData();
+  if (!data) return <ErrorCard />;
   return (
     <>
       <h1>Clientes Top</h1>

@@ -1,10 +1,17 @@
 export const dynamic = 'force-dynamic';
 
+import DeleteClienteForm from './DeleteClienteForm';
+
 type SP = { edit?: string; add?: string; success?: string; error?: string };
 
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { cache: 'no-store' });
-  return res.json();
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export default async function Page({ searchParams }: { searchParams: SP }) {
@@ -92,11 +99,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <td>
                     <div style={{ display: 'flex', gap: '.4rem' }}>
                       <a href={`/gestion-clientes?edit=${r[0]}`} className="btn btn-warning btn-sm">✏️ Editar</a>
-                      <form action="/api/clientes" method="post" style={{ display: 'inline' }}>
-                        <input type="hidden" name="_action" value="eliminar" />
-                        <input type="hidden" name="id" value={r[0]} />
-                        <button type="submit" className="btn btn-danger btn-sm">🗑 Eliminar</button>
-                      </form>
+                      <DeleteClienteForm id={r[0]} />
                     </div>
                   </td>
                 </tr>

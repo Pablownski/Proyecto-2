@@ -1,12 +1,20 @@
 export const dynamic = 'force-dynamic';
 
-async function getData() {
-  const res = await fetch(`${process.env.API_URL}/top-productos`, { cache: 'no-store' });
-  return res.json();
+import ErrorCard from '../components/ErrorCard';
+
+async function getData(): Promise<any[] | null> {
+  try {
+    const res = await fetch(`${process.env.API_URL}/top-productos`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export default async function Page() {
   const data = await getData();
+  if (!data) return <ErrorCard />;
   return (
     <>
       <h1>Top Productos</h1>
@@ -35,12 +43,8 @@ export default async function Page() {
                 <tr key={i}>
                   <td style={{ color: 'var(--muted)', fontWeight: 600 }}>{i + 1}</td>
                   <td><strong>{r[0]}</strong></td>
-                  <td>
-                    <span className="badge badge-blue">{r[1]} uds.</span>
-                  </td>
-                  <td style={{ color: '#059669', fontWeight: 600 }}>
-                    Sí ({r[1]} &gt; 5)
-                  </td>
+                  <td><span className="badge badge-blue">{r[1]} uds.</span></td>
+                  <td style={{ color: '#059669', fontWeight: 600 }}>Sí ({r[1]} &gt; 5)</td>
                 </tr>
               ))}
             </tbody>

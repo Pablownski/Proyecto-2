@@ -1,15 +1,23 @@
 export const dynamic = 'force-dynamic';
 
-async function getData() {
-  const res = await fetch(`${process.env.API_URL}/ventas-bulto`, { cache: 'no-store' });
-  return res.json();
+import ErrorCard from '../components/ErrorCard';
+
+async function getData(): Promise<any[] | null> {
+  try {
+    const res = await fetch(`${process.env.API_URL}/ventas-bulto`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 export default async function Page() {
   const data = await getData();
+  if (!data) return <ErrorCard />;
   return (
     <>
-      <h1>🔍 Ventas con Artículos en Bulto</h1>
+      <h1>Ventas con Artículos en Bulto</h1>
       <div className="alert alert-warn" style={{ marginBottom: '1rem' }}>
         <strong>Subquery con EXISTS:</strong> muestra ventas que tienen al menos una línea de detalle con <code>quantity &gt;= 2</code>.
         <br />

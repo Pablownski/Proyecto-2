@@ -3,8 +3,13 @@ export const dynamic = 'force-dynamic';
 import DeleteProductForm from './DeleteProductForm';
 
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { cache: 'no-store' });
-  return res.json();
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 type SP = { edit?: string; add?: string; success?: string; error?: string };
