@@ -13,13 +13,13 @@ export default function Home({ searchParams }: { searchParams: { success?: strin
 
       {success && (
         <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: 8, padding: '12px 18px', marginBottom: '1rem', color: '#065f46', fontWeight: 500 }}>
-          ✅ Transacción completada — venta creada y stock actualizado correctamente.
+          Transacción completada — venta creada y stock actualizado correctamente.
         </div>
       )}
 
       {rollbackMsg && (
         <div style={{ background: '#fef3c7', border: '1px solid #fbbf24', borderRadius: 8, padding: '12px 18px', marginBottom: '1rem', color: '#92400e' }}>
-          <strong>⚠️ ROLLBACK ejecutado.</strong>
+          <strong>ROLLBACK ejecutado.</strong>
           <p style={{ marginTop: 4, fontSize: '.85rem', fontFamily: 'monospace' }}>{rollbackMsg}</p>
           <p style={{ marginTop: 6, fontSize: '.8rem' }}>Ningún cambio quedó guardado en la base de datos.</p>
         </div>
@@ -55,7 +55,7 @@ export default function Home({ searchParams }: { searchParams: { success?: strin
           </form>
           <form action="/api/rollback-demo" method="post">
             <button type="submit" className="btn" style={{ background: '#dc2626' }}>
-              ⚡ Forzar Rollback (demo)
+              Forzar Rollback (demo)
             </button>
           </form>
         </div>

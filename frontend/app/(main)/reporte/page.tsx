@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import ErrorCard from '../components/ErrorCard';
+import ErrorCard from '../../components/ErrorCard';
 
 async function getData(): Promise<any[] | null> {
   try {
