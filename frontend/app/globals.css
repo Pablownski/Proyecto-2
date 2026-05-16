@@ -427,6 +427,15 @@ ul.nice-list li::before { content: '•'; color: var(--primary); font-weight: 90
 .fg select option { background: var(--surface-2); color: var(--text); }
 
 .form-actions { display: flex; gap: .6rem; margin-top: 1rem; align-items: center; flex-wrap: wrap; }
+
+.field-error {
+  display: block;
+  margin-top: .25rem;
+  font-size: .75rem;
+  color: #f87171;
+  font-weight: 500;
+}
+
 .btn-sm { padding: 6px 14px; font-size: .8rem; }
 .btn-danger { background: var(--danger-dark); }
 .btn-danger:hover { background: #b91c1c; box-shadow: 0 4px 14px rgba(220,38,38,.3); }

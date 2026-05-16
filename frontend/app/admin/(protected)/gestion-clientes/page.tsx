@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import DeleteClienteForm from './DeleteClienteForm';
+import ClienteForm from './ClienteForm';
 
 type SP = { edit?: string; add?: string; success?: string; error?: string };
 
@@ -35,49 +36,28 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
         )}
       </div>
 
-      {sp.success && (
-        <div className="alert alert-success">{decodeURIComponent(sp.success)}</div>
-      )}
-      {sp.error && (
-        <div className="alert alert-error">{decodeURIComponent(sp.error)}</div>
-      )}
+      {sp.success && <div className="alert alert-success" style={{ marginBottom: '1rem' }}>{decodeURIComponent(sp.success)}</div>}
+      {sp.error   && <div className="alert alert-error"   style={{ marginBottom: '1rem' }}>{decodeURIComponent(sp.error)}</div>}
 
       {showAdd && (
         <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--success)' }}>
           <h2>Nuevo Cliente</h2>
-          <form action="/api/clientes" method="post">
-            <input type="hidden" name="_action" value="crear" />
-            <input type="hidden" name="_redirect" value="/admin/gestion-clientes" />
-            <div className="form-grid">
-              <div className="fg"><label>Nombre completo *</label><input name="name" required /></div>
-              <div className="fg"><label>Email *</label><input name="email" type="email" required /></div>
-              <div className="fg"><label>Teléfono *</label><input name="phone" required /></div>
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-success btn-sm">Guardar</button>
-              <a href="/admin/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</a>
-            </div>
-          </form>
+          <ClienteForm mode="crear" />
         </div>
       )}
 
       {editId && editData && (
         <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid var(--primary)' }}>
           <h2>Editar Cliente #{editId}</h2>
-          <form action="/api/clientes" method="post">
-            <input type="hidden" name="_action" value="editar" />
-            <input type="hidden" name="id" value={editId} />
-            <input type="hidden" name="_redirect" value="/admin/gestion-clientes" />
-            <div className="form-grid">
-              <div className="fg"><label>Nombre completo *</label><input name="name" defaultValue={editData[1]} required /></div>
-              <div className="fg"><label>Email *</label><input name="email" type="email" defaultValue={editData[2]} required /></div>
-              <div className="fg"><label>Teléfono *</label><input name="phone" defaultValue={editData[3]} required /></div>
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-sm">Actualizar</button>
-              <a href="/admin/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</a>
-            </div>
-          </form>
+          <ClienteForm
+            mode="editar"
+            id={editId}
+            initial={{
+              name:  String(editData[1] ?? ''),
+              email: String(editData[2] ?? ''),
+              phone: String(editData[3] ?? ''),
+            }}
+          />
         </div>
       )}
 
