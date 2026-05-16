@@ -1,3 +1,4 @@
+import Link from 'next/link';
 type SP = { error?: string; username?: string };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -136,15 +137,15 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
         <p style={{ textAlign: 'center', fontSize: '.875rem', color: '#5a6485' }}>
           ¿No tienes cuenta?{' '}
-          <a href="/registro" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
+          <Link href="/registro" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
             Crear cuenta
-          </a>
+          </Link>
         </p>
 
         <p style={{ textAlign: 'center', marginTop: '.75rem', fontSize: '.8rem' }}>
-          <a href="/admin/login" style={{ color: 'rgba(245,166,35,.5)', textDecoration: 'none', fontSize: '.75rem' }}>
+          <Link href="/admin/login" style={{ color: 'rgba(245,166,35,.5)', textDecoration: 'none', fontSize: '.75rem' }}>
             Acceso admin
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -157,7 +158,7 @@ export default function ProductoForm({ mode, id, categorias, proveedores, initia
         <button type="submit" className="btn btn-success btn-sm" disabled={loading}>
           {loading ? 'Guardando...' : mode === 'crear' ? 'Guardar' : 'Actualizar'}
         </button>
-        <a href="/admin/productos" className="btn btn-ghost btn-sm">Cancelar</a>
+        <Link href="/admin/productos" className="btn btn-ghost btn-sm">Cancelar</Link>
       </div>
     </form>
   );

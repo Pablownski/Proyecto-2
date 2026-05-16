@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 const ADMIN_LINKS = [
@@ -28,7 +29,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           {/* Desktop links — hidden on mobile */}
           <div className="admin-nav-links">
             {ADMIN_LINKS.map(({ href, label }) => (
-              <a key={href} href={href}>{label}</a>
+              <Link key={href} href={href}>{label}</Link>
             ))}
             <span style={{ marginLeft: 'auto' }}>
               <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/logout`} method="post" className="admin-logout-form">
@@ -65,7 +66,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         {open && (
           <div className="admin-drawer">
             {ADMIN_LINKS.map(({ href, label }) => (
-              <a key={href} href={href} onClick={close}>{label}</a>
+              <Link key={href} href={href} onClick={close}>{label}</Link>
             ))}
             <div className="nav-drawer-divider" />
             <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/logout`} method="post" className="admin-logout-form">

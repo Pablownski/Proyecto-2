@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
@@ -86,7 +87,7 @@ export default function CarritoPage() {
           <p style={{ color: 'var(--muted)', marginBottom: '1.5rem', fontSize: '1rem' }}>
             Tu carrito está vacío.
           </p>
-          <a href="/productos" className="btn btn-success">Ver productos</a>
+          <Link href="/productos" className="btn btn-success">Ver productos</Link>
         </div>
       ) : (
         <div className="carrito-grid">

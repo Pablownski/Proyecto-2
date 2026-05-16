@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import DeleteProductForm from './DeleteProductForm';
 
 interface Producto {
@@ -149,7 +150,7 @@ export default function ProductosTable({ editId }: Props) {
                   <td><StockCell stock={r.stock} /></td>
                   <td>
                     <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <a href={`/admin/productos?edit=${r.id}`} className="btn btn-warning btn-sm">Editar</a>
+                      <Link href={`/admin/productos?edit=${r.id}`} className="btn btn-warning btn-sm">Editar</Link>
                       <DeleteProductForm id={r.id} redirectTo="/admin/productos" />
                     </div>
                   </td>

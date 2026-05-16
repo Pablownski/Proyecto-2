@@ -39,12 +39,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
           {/* Desktop links — hidden on mobile via CSS */}
           <div className="nav-links">
             {NAV_LINKS.map(({ href, label }) => (
-              <a key={href} href={href} style={{ position: 'relative' }}>
+              <Link key={href} href={href} style={{ position: 'relative' }}>
                 {label}
                 {label === 'Carrito' && itemCount > 0 && (
                   <span className="cart-badge">{itemCount}</span>
                 )}
-              </a>
+              </Link>
             ))}
             {username && (
               <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '.75rem' }}>
@@ -65,7 +65,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         {open && (
           <div className="nav-drawer">
             {NAV_LINKS.map(({ href, label }) => (
-              <a key={href} href={href} onClick={close}>
+              <Link key={href} href={href} onClick={close}>
                 {label}
                 {label === 'Carrito' && itemCount > 0 && (
                   <span style={{
@@ -77,7 +77,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                     {itemCount}
                   </span>
                 )}
-              </a>
+              </Link>
             ))}
             {username && (
               <>

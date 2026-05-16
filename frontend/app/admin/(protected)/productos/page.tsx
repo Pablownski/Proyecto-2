@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import Link from 'next/link';
 import ProductosTable from './ProductosTable';
 import ProductoForm from './ProductoForm';
 
@@ -37,9 +38,9 @@ export default async function AdminProductosPage({ searchParams }: { searchParam
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <h1 style={{ margin: 0 }}>Gestión de Productos</h1>
         {!showAdd && !editId && (
-          <a href="/admin/productos?add=1" className="btn btn-success btn-sm">
+          <Link href="/admin/productos?add=1" className="btn btn-success btn-sm">
             + Agregar Producto
-          </a>
+          </Link>
         )}
       </div>
 

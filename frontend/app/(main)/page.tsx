@@ -1,3 +1,4 @@
+import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
@@ -9,18 +10,18 @@ export default async function Home() {
       </div>
 
       <div className="grid-2">
-        <a href="/productos" style={{ textDecoration: 'none' }}>
+        <Link href="/productos" style={{ textDecoration: 'none' }}>
           <div className="card" style={{ cursor: 'pointer', padding: '2rem' }}>
             <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '.3rem' }}>Productos</div>
             <div style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Explora todo el catálogo disponible</div>
           </div>
-        </a>
-        <a href="/carrito" style={{ textDecoration: 'none' }}>
+        </Link>
+        <Link href="/carrito" style={{ textDecoration: 'none' }}>
           <div className="card" style={{ cursor: 'pointer', padding: '2rem' }}>
             <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '.3rem' }}>Carrito</div>
             <div style={{ fontSize: '.85rem', color: 'var(--muted)' }}>Revisa y confirma tu compra</div>
           </div>
-        </a>
+        </Link>
       </div>
     </>
   );

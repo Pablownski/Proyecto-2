@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -104,7 +105,7 @@ export default function ClienteForm({ mode, id, initial }: Props) {
         <button type="submit" className="btn btn-success btn-sm" disabled={loading}>
           {loading ? 'Guardando...' : mode === 'crear' ? 'Guardar' : 'Actualizar'}
         </button>
-        <a href="/admin/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</a>
+        <Link href="/admin/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</Link>
       </div>
     </form>
   );

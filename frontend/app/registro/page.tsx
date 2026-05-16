@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import RegistroForm from './RegistroForm';
 
 type SP = { error?: string };
@@ -51,9 +52,9 @@ export default async function RegistroPage({ searchParams }: { searchParams: Pro
 
         <p style={{ textAlign: 'center', fontSize: '.875rem', color: '#5a6485' }}>
           ¿Ya tienes cuenta?{' '}
-          <a href="/login" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
+          <Link href="/login" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
             Iniciar sesión
-          </a>
+          </Link>
         </p>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 type SP = { error?: string };
 
 export default async function AdminLoginPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -108,9 +109,9 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '.8rem', color: 'rgba(255,255,255,.3)' }}>
-          <a href="/login" style={{ color: 'rgba(255,255,255,.4)', textDecoration: 'none' }}>
+          <Link href="/login" style={{ color: 'rgba(255,255,255,.4)', textDecoration: 'none' }}>
             ← Volver al login de usuario
-          </a>
+          </Link>
         </p>
       </div>
     </div>

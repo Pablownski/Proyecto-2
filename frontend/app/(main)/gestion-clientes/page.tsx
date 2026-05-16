@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 
+import Link from 'next/link';
 import DeleteClienteForm from './DeleteClienteForm';
 
 type SP = { edit?: string; add?: string; success?: string; error?: string };
@@ -31,7 +32,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
         <h1 style={{ margin: 0 }}>Gestión de Clientes</h1>
         {!showAdd && !editId && (
-          <a href="/gestion-clientes?add=1" className="btn btn-success btn-sm">＋ Agregar Cliente</a>
+          <Link href="/gestion-clientes?add=1" className="btn btn-success btn-sm">＋ Agregar Cliente</Link>
         )}
       </div>
 
@@ -55,7 +56,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn-success btn-sm">Guardar</button>
-              <a href="/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</a>
+              <Link href="/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</Link>
             </div>
           </form>
         </div>
@@ -75,7 +76,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
             </div>
             <div className="form-actions">
               <button type="submit" className="btn btn-sm">Actualizar</button>
-              <a href="/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</a>
+              <Link href="/gestion-clientes" className="btn btn-ghost btn-sm">Cancelar</Link>
             </div>
           </form>
         </div>
@@ -99,7 +100,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<SP>
                   <td>{r[3]}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <a href={`/gestion-clientes?edit=${r[0]}`} className="btn btn-warning btn-sm">Editar</a>
+                      <Link href={`/gestion-clientes?edit=${r[0]}`} className="btn btn-warning btn-sm">Editar</Link>
                       <DeleteClienteForm id={r[0]} />
                     </div>
                   </td>
