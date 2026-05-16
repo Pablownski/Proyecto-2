@@ -7,9 +7,15 @@ export async function POST(request: Request) {
   const username = (form.get('username') as string)?.trim();
   const password = form.get('password') as string;
   const confirm = form.get('confirm_password') as string;
+  const name  = (form.get('name')  as string)?.trim();
+  const email = (form.get('email') as string)?.trim();
+  const phone = (form.get('phone') as string)?.trim();
 
   if (!username || !password) {
     return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Usuario y contraseña requeridos.')}`);
+  }
+  if (!name || !email || !phone) {
+    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Nombre, email y teléfono son obligatorios.')}`);
   }
   if (password.length < 6) {
     return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('La contraseña debe tener al menos 6 caracteres.')}`);
@@ -22,7 +28,7 @@ export async function POST(request: Request) {
     const res = await fetch(`${process.env.API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, name, email, phone }),
     });
 
     if (!res.ok) {

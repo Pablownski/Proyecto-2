@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
-  const token = cookies().get('session_token')?.value;
+  const token = (await cookies()).get('session_token')?.value;
 
   if (token) {
     try {
