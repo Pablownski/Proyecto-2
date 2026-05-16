@@ -34,5 +34,8 @@ services:
       - backend
     environment:
       API_URL: ${API_URL}
+      ADMIN_USER: ${ADMIN_USER}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_SECRET: ${ADMIN_SECRET}
     ports:
       - "3000:3000"
