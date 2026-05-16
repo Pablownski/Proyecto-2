@@ -3,7 +3,8 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE TABLE usuario (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL
+    password_hash TEXT NOT NULL,
+    customer_id INT REFERENCES cliente(customer_id) ON DELETE SET NULL
 );
 
 CREATE TABLE sesion (

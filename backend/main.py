@@ -1,9 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import psycopg2
 from db import get_connection
 
-app = FastAPI()
+app = FastAPI(
+    title="Tienda GT — API REST",
+    description="API REST para gestión de tienda: productos, clientes, ventas y reportes.",
+    version="1.0.0",
+)
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
@@ -22,6 +27,14 @@ class ProductoIn(BaseModel):
     category_id: int
     supplier_id: int
 
+class CompraItem(BaseModel):
+    product_id: int
+    quantity: int
+
+class CompraIn(BaseModel):
+    items: list[CompraItem]
+    session_token: str | None = None
+
 class LoginIn(BaseModel):
     username: str
     password: str
@@ -29,6 +42,9 @@ class LoginIn(BaseModel):
 class RegisterIn(BaseModel):
     username: str
     password: str
+    name: str
+    email: str
+    phone: str
 
 # ── AUTH ───────────────────────────────────────────────────────────────────────
 
@@ -38,17 +54,17 @@ def auth_login(data: LoginIn):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT user_id FROM usuario WHERE username=%s AND password_hash=crypt(%s, password_hash);",
+            "SELECT user_id, customer_id FROM usuario WHERE username=%s AND password_hash=crypt(%s, password_hash);",
             (data.username, data.password)
         )
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
-        user_id = row[0]
+        user_id, customer_id = row[0], row[1]
         cursor.execute("INSERT INTO sesion (user_id) VALUES (%s) RETURNING token::text;", (user_id,))
         token = cursor.fetchone()[0]
         conn.commit()
-        return {"token": token, "username": data.username}
+        return {"token": token, "username": data.username, "customer_id": customer_id}
     except HTTPException:
         raise
     except Exception as e:
@@ -74,18 +90,25 @@ def auth_register(data: RegisterIn):
         raise HTTPException(status_code=400, detail="El nombre de usuario no puede estar vacío")
     if len(data.password) < 6:
         raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    if not data.name.strip() or not data.email.strip() or not data.phone.strip():
+        raise HTTPException(status_code=400, detail="Nombre, email y teléfono son obligatorios")
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "INSERT INTO usuario (username, password_hash) VALUES (%s, crypt(%s, gen_salt('bf', 12))) RETURNING user_id;",
-            (data.username.strip(), data.password)
+            "INSERT INTO cliente (name, email, phone) VALUES (%s, %s, %s) RETURNING customer_id;",
+            (data.name.strip(), data.email.strip(), data.phone.strip())
+        )
+        customer_id = cursor.fetchone()[0]
+        cursor.execute(
+            "INSERT INTO usuario (username, password_hash, customer_id) VALUES (%s, crypt(%s, gen_salt('bf', 12)), %s) RETURNING user_id;",
+            (data.username.strip(), data.password, customer_id)
         )
         user_id = cursor.fetchone()[0]
         cursor.execute("INSERT INTO sesion (user_id) VALUES (%s) RETURNING token::text;", (user_id,))
         token = cursor.fetchone()[0]
         conn.commit()
-        return {"token": token, "username": data.username.strip()}
+        return {"token": token, "username": data.username.strip(), "customer_id": customer_id}
     except HTTPException:
         raise
     except Exception as e:
@@ -321,6 +344,9 @@ def eliminar_producto(producto_id: int):
         cursor.execute("DELETE FROM producto WHERE product_id=%s;", (producto_id,))
         conn.commit()
         return {"ok": True}
+    except psycopg2.errors.ForeignKeyViolation:
+        conn.rollback()
+        raise HTTPException(status_code=409, detail="No se puede eliminar: este producto tiene ventas registradas.")
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
@@ -382,6 +408,138 @@ def eliminar_cliente(cliente_id: int):
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+# ── STATS / DASHBOARD ──────────────────────────────────────────────────────────
+
+@app.get("/stats/resumen")
+def stats_resumen():
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT COUNT(*) FROM venta;")
+        total_ventas = cursor.fetchone()[0]
+        cursor.execute("SELECT COALESCE(SUM(total), 0) FROM venta;")
+        ingresos = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM producto;")
+        total_productos = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM cliente;")
+        total_clientes = cursor.fetchone()[0]
+        return {
+            "total_ventas": total_ventas,
+            "ingresos_totales": float(ingresos),
+            "total_productos": total_productos,
+            "total_clientes": total_clientes,
+        }
+    finally:
+        conn.close()
+
+@app.get("/stats/ventas-por-mes")
+def stats_ventas_por_mes():
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT TO_CHAR(date, 'YYYY-MM') AS mes,
+                   COUNT(*)               AS cantidad,
+                   SUM(total)             AS ingresos
+            FROM venta
+            GROUP BY mes
+            ORDER BY mes;
+        """)
+        rows = cursor.fetchall()
+        return [{"mes": r[0], "cantidad": r[1], "ingresos": float(r[2])} for r in rows]
+    finally:
+        conn.close()
+
+@app.get("/stats/stock-por-categoria")
+def stats_stock_por_categoria():
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            SELECT c.name, SUM(p.stock) AS stock_total
+            FROM producto p
+            JOIN categoria c ON p.category_id = c.category_id
+            GROUP BY c.name
+            ORDER BY stock_total DESC
+            LIMIT 8;
+        """)
+        rows = cursor.fetchall()
+        return [{"categoria": r[0], "stock": int(r[1])} for r in rows]
+    finally:
+        conn.close()
+
+# ── COMPRA (carrito) ───────────────────────────────────────────────────────────
+
+@app.post("/compra")
+def crear_compra(data: CompraIn):
+    if not data.items:
+        raise HTTPException(status_code=400, detail="El carrito está vacío")
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        conn.autocommit = False
+
+        # Validar stock y calcular total dentro de la misma transacción
+        total = 0.0
+        precios: dict[int, float] = {}
+        for item in data.items:
+            cursor.execute(
+                "SELECT name, price, stock FROM producto WHERE product_id=%s FOR UPDATE",
+                (item.product_id,)
+            )
+            row = cursor.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail=f"Producto {item.product_id} no encontrado")
+            name, price, stock = row[0], float(row[1]), row[2]
+            if stock < item.quantity:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Stock insuficiente para '{name}': disponible {stock}, solicitado {item.quantity}"
+                )
+            precios[item.product_id] = price
+            total += price * item.quantity
+
+        # Resolver customer_id desde session_token
+        customer_id = 1
+        if data.session_token:
+            cursor.execute(
+                "SELECT u.customer_id FROM sesion s JOIN usuario u ON s.user_id=u.user_id WHERE s.token=%s::uuid;",
+                (data.session_token,)
+            )
+            row = cursor.fetchone()
+            if row and row[0]:
+                customer_id = row[0]
+
+        # Insertar venta
+        cursor.execute(
+            "INSERT INTO venta (date, total, customer_id, employee_id) VALUES (NOW(), %s, %s, 1) RETURNING sale_id",
+            (total, customer_id)
+        )
+        sale_id = cursor.fetchone()[0]
+
+        # Insertar detalles y descontar stock
+        for item in data.items:
+            price = precios[item.product_id]
+            cursor.execute(
+                "INSERT INTO detalle_venta (quantity, unit_price, subtotal, sale_id, product_id) VALUES (%s, %s, %s, %s, %s)",
+                (item.quantity, price, price * item.quantity, sale_id, item.product_id)
+            )
+            cursor.execute(
+                "UPDATE producto SET stock = stock - %s WHERE product_id = %s",
+                (item.quantity, item.product_id)
+            )
+
+        conn.commit()
+        return {"sale_id": sale_id, "total": round(total, 2)}
+    except HTTPException:
+        conn.rollback()
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         conn.close()
 
