@@ -37,5 +37,6 @@ services:
       ADMIN_USER: ${ADMIN_USER}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_SECRET: ${ADMIN_SECRET}
+      NEXT_BASE_PATH: ${NEXT_BASE_PATH:-}
     ports:
       - "3000:3000"
