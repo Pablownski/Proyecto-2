@@ -46,7 +46,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 )}
               </Link>
             ))}
-            {username && (
+            {username ? (
               <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '.75rem' }}>
                 <span style={{ color: 'rgba(255,255,255,.65)', fontSize: '.8rem' }}>{username}</span>
                 <button
@@ -57,6 +57,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                   Salir
                 </button>
               </span>
+            ) : (
+              <Link href="/login" className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto', borderColor: 'rgba(255,255,255,.4)', color: '#fff' }}>
+                Iniciar sesión
+              </Link>
             )}
           </div>
         </div>
@@ -79,9 +83,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                 )}
               </Link>
             ))}
-            {username && (
+            <div className="nav-drawer-divider" />
+            {username ? (
               <>
-                <div className="nav-drawer-divider" />
                 <span className="nav-drawer-user">{username}</span>
                 <button
                   onClick={() => { close(); logout(); }}
@@ -90,6 +94,10 @@ export default function MainLayout({ children }: { children: ReactNode }) {
                   Salir
                 </button>
               </>
+            ) : (
+              <Link href="/login" onClick={close} style={{ padding: '.75rem 1rem', color: 'rgba(255,255,255,.8)', textDecoration: 'none', fontSize: '.9rem' }}>
+                Iniciar sesión
+              </Link>
             )}
           </div>
         )}
