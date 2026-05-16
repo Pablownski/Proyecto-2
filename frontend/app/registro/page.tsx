@@ -2,25 +2,56 @@ import RegistroForm from './RegistroForm';
 
 type SP = { error?: string };
 
-export default function RegistroPage({ searchParams }: { searchParams: SP }) {
-  const errorMsg = searchParams.error ? decodeURIComponent(searchParams.error) : undefined;
+export default async function RegistroPage({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
+  const errorMsg = sp.error ? decodeURIComponent(sp.error) : undefined;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-      <div className="card" style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '.5rem' }}>🏪</div>
-          <h1 style={{ marginBottom: '.25rem' }}>Crear cuenta</h1>
-          <p style={{ color: 'var(--muted)', fontSize: '.875rem' }}>Completa los campos para registrarte</p>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#07091a',
+      padding: '1rem',
+    }}>
+      <div style={{
+        background: '#0d0f22',
+        border: '1px solid rgba(124,111,250,.2)',
+        borderRadius: 14,
+        padding: '2.5rem',
+        width: '100%',
+        maxWidth: 420,
+        boxShadow: '0 8px 40px rgba(0,0,0,.55)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(124,111,250,.12)',
+            border: '1px solid rgba(124,111,250,.25)',
+            borderRadius: 10,
+            padding: '8px 18px',
+            marginBottom: '1rem',
+          }}>
+            <span style={{ color: '#f5a623', fontWeight: 800, fontSize: '1rem', letterSpacing: '.04em' }}>
+              TIENDA
+            </span>
+          </div>
+          <h1 style={{ color: '#dde4f5', fontSize: '1.4rem', fontWeight: 800, marginBottom: '.3rem' }}>
+            Crear cuenta
+          </h1>
+          <p style={{ color: '#5a6485', fontSize: '.85rem' }}>
+            Completa los campos para registrarte
+          </p>
         </div>
 
         <RegistroForm serverError={errorMsg} />
 
-        <hr style={{ margin: '1.25rem 0', borderColor: 'var(--border)' }} />
+        <div style={{ height: 1, background: 'rgba(124,111,250,.12)', margin: '1.5rem 0' }} />
 
-        <p style={{ textAlign: 'center', fontSize: '.875rem', color: 'var(--muted)' }}>
+        <p style={{ textAlign: 'center', fontSize: '.875rem', color: '#5a6485' }}>
           ¿Ya tienes cuenta?{' '}
-          <a href="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+          <a href="/login" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
             Iniciar sesión
           </a>
         </p>

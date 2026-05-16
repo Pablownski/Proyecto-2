@@ -11,7 +11,15 @@ export default function RegistroForm({ serverError }: { serverError?: string }) 
     const username = (form.elements.namedItem('username') as HTMLInputElement).value.trim();
     const password = (form.elements.namedItem('password') as HTMLInputElement).value;
     const confirm = (form.elements.namedItem('confirm_password') as HTMLInputElement).value;
+    const name  = (form.elements.namedItem('name')  as HTMLInputElement).value.trim();
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
+    const phone = (form.elements.namedItem('phone') as HTMLInputElement).value.trim();
 
+    if (!name || !email || !phone) {
+      e.preventDefault();
+      setClientError('Nombre, email y teléfono son obligatorios.');
+      return;
+    }
     if (!username) {
       e.preventDefault();
       setClientError('El nombre de usuario es requerido.');
@@ -42,8 +50,21 @@ export default function RegistroForm({ serverError }: { serverError?: string }) 
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '.85rem' }}>
         <div className="fg">
+          <label>Nombre completo *</label>
+          <input name="name" autoComplete="name" required autoFocus />
+        </div>
+        <div className="fg">
+          <label>Email *</label>
+          <input name="email" type="email" autoComplete="email" required />
+        </div>
+        <div className="fg">
+          <label>Teléfono *</label>
+          <input name="phone" type="tel" autoComplete="tel" required />
+        </div>
+        <div style={{ height: 1, background: 'rgba(124,111,250,.1)', margin: '.15rem 0' }} />
+        <div className="fg">
           <label>Usuario</label>
-          <input name="username" autoComplete="username" required autoFocus />
+          <input name="username" autoComplete="username" required />
         </div>
         <div className="fg">
           <label>Contraseña <span style={{ color: 'var(--muted)', fontWeight: 400 }}>(mín. 6 caracteres)</span></label>
