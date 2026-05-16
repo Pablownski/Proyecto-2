@@ -513,10 +513,15 @@ def crear_compra(data: CompraIn):
             if row and row[0]:
                 customer_id = row[0]
 
+        # Asignar empleado aleatorio
+        cursor.execute("SELECT employee_id FROM empleado ORDER BY RANDOM() LIMIT 1;")
+        emp_row = cursor.fetchone()
+        employee_id = emp_row[0] if emp_row else 1
+
         # Insertar venta
         cursor.execute(
-            "INSERT INTO venta (date, total, customer_id, employee_id) VALUES (NOW(), %s, %s, 1) RETURNING sale_id",
-            (total, customer_id)
+            "INSERT INTO venta (date, total, customer_id, employee_id) VALUES (NOW(), %s, %s, %s) RETURNING sale_id",
+            (total, customer_id, employee_id)
         )
         sale_id = cursor.fetchone()[0]
 
