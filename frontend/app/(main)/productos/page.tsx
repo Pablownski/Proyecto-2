@@ -1,158 +1,212 @@
-export const dynamic = 'force-dynamic';
+'use client';
 
-import DeleteProductForm from './DeleteProductForm';
+import { useState, useEffect, useCallback } from 'react';
+import AddToCartButton from '../../components/AddToCartButton';
 
-async function fetchJSON(url: string) {
-  try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
+interface Producto {
+  id: number;
+  name: string;
+  category: string;
+  supplier: string;
+  price: number;
+  stock: number;
 }
 
-type SP = { edit?: string; add?: string; success?: string; error?: string };
+function mapRow(r: any[]): Producto {
+  return { id: r[0], name: r[1], category: r[2], supplier: r[3], price: Number(r[4]), stock: r[5] };
+}
 
-export default async function Page({ searchParams }: { searchParams: SP }) {
-  const [productos, categorias, proveedores] = await Promise.all([
-    fetchJSON(`${process.env.API_URL}/productos`),
-    fetchJSON(`${process.env.API_URL}/categorias`),
-    fetchJSON(`${process.env.API_URL}/proveedores-lista`),
-  ]);
+function StockIndicator({ stock }: { stock: number }) {
+  if (stock === 0) return null;
 
-  const editId = searchParams.edit ? parseInt(searchParams.edit) : null;
-  const showAdd = searchParams.add === '1';
+  const low  = stock <= 3;
+  const mid  = stock <= 10;
 
-  let editData: any = null;
-  if (editId) {
-    editData = await fetchJSON(`${process.env.API_URL}/producto/${editId}`);
+  const color = low ? '#b45309' : mid ? '#0369a1' : '#047857';
+  const bg    = low ? '#fef3c7' : mid ? '#e0f2fe' : '#d1fae5';
+  const label = low ? `Últimas ${stock} unidades` : `${stock} en stock`;
+
+  return (
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '.35rem',
+      background: bg,
+      color,
+      borderRadius: 6,
+      padding: '3px 8px',
+      fontSize: '.72rem',
+      fontWeight: 700,
+    }}>
+      <span style={{
+        width: 6, height: 6, borderRadius: '50%',
+        background: color, flexShrink: 0,
+        boxShadow: `0 0 0 2px ${bg}`,
+      }} />
+      {label}
+    </div>
+  );
+}
+
+export default function ProductosPage() {
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const fetchProductos = useCallback(async () => {
+    try {
+      const res = await fetch('/api/productos-lista', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      setProductos(data.map(mapRow));
+      setLastUpdated(new Date());
+    } catch {
+      // red silenciosa — mantiene datos anteriores
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Fetch inicial
+  useEffect(() => {
+    fetchProductos();
+  }, [fetchProductos]);
+
+  // Refresca al volver al tab (cubre el caso de "acabo de pagar")
+  useEffect(() => {
+    const onFocus = () => fetchProductos();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [fetchProductos]);
+
+  // Polling cada 30 s
+  useEffect(() => {
+    const id = setInterval(fetchProductos, 30_000);
+    return () => clearInterval(id);
+  }, [fetchProductos]);
+
+  if (loading) {
+    return (
+      <>
+        <div className="hero" style={{ marginBottom: '1.5rem' }}>
+          <h1>Nuestros Productos</h1>
+          <p>Cargando catálogo...</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="card skeleton-card" style={{ height: 200 }} />
+          ))}
+        </div>
+      </>
+    );
   }
-
-  const inputCls = 'fg';
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <h1 style={{ margin: 0 }}>📦 Productos</h1>
-        {!showAdd && !editId && (
-          <a href="/productos?add=1" className="btn btn-success btn-sm">＋ Agregar Producto</a>
-        )}
-      </div>
-
-      {searchParams.success && (
-        <div className="alert alert-success">✅ {decodeURIComponent(searchParams.success)}</div>
-      )}
-      {searchParams.error && (
-        <div className="alert alert-error">❌ {decodeURIComponent(searchParams.error)}</div>
-      )}
-
-      {/* ── FORM CREAR ── */}
-      {showAdd && (
-        <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #059669' }}>
-          <h2>Nuevo Producto</h2>
-          <form action="/api/productos" method="post">
-            <input type="hidden" name="_action" value="crear" />
-            <div className="form-grid">
-              <div className={inputCls}><label>Nombre *</label><input name="name" required /></div>
-              <div className={inputCls}><label>Precio (Q) *</label><input name="price" type="number" step="0.01" min="0" required /></div>
-              <div className={inputCls}><label>Stock *</label><input name="stock" type="number" min="0" required /></div>
-              <div className={inputCls}>
-                <label>Categoría *</label>
-                <select name="category_id" required>
-                  <option value="">Seleccionar…</option>
-                  {categorias.map((c: any) => <option key={c[0]} value={c[0]}>{c[1]}</option>)}
-                </select>
-              </div>
-              <div className={inputCls}>
-                <label>Proveedor *</label>
-                <select name="supplier_id" required>
-                  <option value="">Seleccionar…</option>
-                  {proveedores.map((p: any) => <option key={p[0]} value={p[0]}>{p[1]}</option>)}
-                </select>
-              </div>
-              <div className={inputCls} style={{ gridColumn: '1 / -1' }}>
-                <label>Descripción</label>
-                <input name="description" defaultValue="" />
-              </div>
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-success btn-sm">Guardar</button>
-              <a href="/productos" className="btn btn-ghost btn-sm">Cancelar</a>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* ── FORM EDITAR ── */}
-      {editId && editData && (
-        <div className="card" style={{ marginBottom: '1.5rem', borderLeft: '4px solid #4f46e5' }}>
-          <h2>Editar Producto #{editId}</h2>
-          <form action="/api/productos" method="post">
-            <input type="hidden" name="_action" value="editar" />
-            <input type="hidden" name="id" value={editId} />
-            <div className="form-grid">
-              <div className={inputCls}><label>Nombre *</label><input name="name" defaultValue={editData[1]} required /></div>
-              <div className={inputCls}><label>Precio (Q) *</label><input name="price" type="number" step="0.01" min="0" defaultValue={editData[3]} required /></div>
-              <div className={inputCls}><label>Stock *</label><input name="stock" type="number" min="0" defaultValue={editData[4]} required /></div>
-              <div className={inputCls}>
-                <label>Categoría *</label>
-                <select name="category_id" defaultValue={editData[5]} required>
-                  {categorias.map((c: any) => <option key={c[0]} value={c[0]}>{c[1]}</option>)}
-                </select>
-              </div>
-              <div className={inputCls}>
-                <label>Proveedor *</label>
-                <select name="supplier_id" defaultValue={editData[6]} required>
-                  {proveedores.map((p: any) => <option key={p[0]} value={p[0]}>{p[1]}</option>)}
-                </select>
-              </div>
-              <div className={inputCls} style={{ gridColumn: '1 / -1' }}>
-                <label>Descripción</label>
-                <input name="description" defaultValue={editData[2]} />
-              </div>
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-sm">Actualizar</button>
-              <a href="/productos" className="btn btn-ghost btn-sm">Cancelar</a>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* ── TABLA ── */}
-      <div className="card">
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th><th>Producto</th><th>Categoría</th><th>Proveedor</th>
-                <th>Precio</th><th>Stock</th><th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productos.length === 0 ? (
-                <tr><td colSpan={7} className="empty">Sin productos</td></tr>
-              ) : productos.map((r: any) => (
-                <tr key={r[0]} className={editId === r[0] ? 'editing' : ''}>
-                  <td><span className="badge badge-blue">{r[0]}</span></td>
-                  <td><strong>{r[1]}</strong></td>
-                  <td>{r[2]}</td>
-                  <td>{r[3]}</td>
-                  <td>Q{Number(r[4]).toFixed(2)}</td>
-                  <td>{r[5]}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <a href={`/productos?edit=${r[0]}`} className="btn btn-warning btn-sm">✏️ Editar</a>
-                      <DeleteProductForm id={r[0]} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="hero" style={{ marginBottom: '1.5rem' }}>
+        <h1>Nuestros Productos</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+          <p style={{ margin: 0 }}>{productos.length} productos disponibles</p>
+          {lastUpdated && (
+            <span style={{
+              fontSize: '.72rem', opacity: .75,
+              background: 'rgba(255,255,255,.15)',
+              borderRadius: 20, padding: '2px 10px',
+            }}>
+              Stock actualizado {lastUpdated.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          )}
+          <button
+            onClick={fetchProductos}
+            style={{
+              background: 'rgba(255,255,255,.15)',
+              border: '1px solid rgba(255,255,255,.3)',
+              color: '#fff',
+              borderRadius: 20,
+              padding: '3px 12px',
+              fontSize: '.72rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background .15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,.25)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,.15)')}
+          >
+            Actualizar
+          </button>
         </div>
       </div>
+
+      {productos.length === 0 ? (
+        <div className="empty">No hay productos disponibles.</div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          gap: '1.25rem',
+        }}>
+          {productos.map(p => {
+            const inStock = p.stock > 0;
+
+            return (
+              <div
+                key={p.id}
+                className={`card product-card${inStock ? '' : ' product-card--out'}`}
+                style={{ display: 'flex', flexDirection: 'column', gap: '.6rem', opacity: inStock ? 1 : .55, position: 'relative' }}
+              >
+                {/* Badges de categoría y estado */}
+                <div style={{ display: 'flex', gap: '.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span className="badge badge-blue" style={{ fontSize: '.7rem' }}>{p.category}</span>
+                  {!inStock && (
+                    <span style={{ background: '#fee2e2', color: '#991b1b', padding: '2px 8px', borderRadius: 999, fontSize: '.7rem', fontWeight: 700 }}>
+                      Agotado
+                    </span>
+                  )}
+                </div>
+
+                {/* Nombre */}
+                <div style={{ fontWeight: 700, fontSize: '1rem', lineHeight: 1.3, flex: 1 }}>{p.name}</div>
+
+                {/* Proveedor */}
+                <div style={{ fontSize: '.75rem', color: 'var(--muted)' }}>Proveedor: {p.supplier}</div>
+
+                {/* Stock indicator */}
+                {inStock && <StockIndicator stock={p.stock} />}
+
+                {/* Precio + botón */}
+                <div style={{
+                  marginTop: 'auto',
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  paddingTop: '.6rem', borderTop: '1px solid var(--border)',
+                }}>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--primary)' }}>
+                    Q{p.price.toFixed(2)}
+                  </span>
+                  <AddToCartButton
+                    productId={p.id}
+                    name={p.name}
+                    price={p.price}
+                    stock={p.stock}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes shimmer {
+          from { background-position: -400px 0; }
+          to   { background-position:  400px 0; }
+        }
+        .skeleton-card {
+          background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+          background-size: 800px 100%;
+          animation: shimmer 1.4s infinite linear;
+          border: none !important;
+        }
+      `}</style>
     </>
   );
 }

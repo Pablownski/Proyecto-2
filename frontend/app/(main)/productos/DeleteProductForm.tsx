@@ -11,7 +11,7 @@ export default function DeleteProductForm({ id }: { id: number }) {
     <form action="/api/productos" method="post" style={{ display: 'inline' }} onSubmit={handleSubmit}>
       <input type="hidden" name="_action" value="eliminar" />
       <input type="hidden" name="id" value={id} />
-      <button type="submit" className="btn btn-danger btn-sm">🗑 Eliminar</button>
+      <button type="submit" className="btn btn-danger btn-sm">Eliminar</button>
     </form>
   );
 }
