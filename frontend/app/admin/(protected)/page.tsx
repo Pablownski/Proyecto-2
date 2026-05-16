@@ -1,6 +1,6 @@
 'use client';
 
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useState } from 'react';
 import NumberFlow from '@number-flow/react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -310,6 +310,67 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+
+      {/* ── Demo Transacción / Rollback ── */}
+      <TransaccionDemo />
     </>
+  );
+}
+
+function TransaccionDemo() {
+  const [resultado, setResultado] = useState<{ tipo: 'exito' | 'rollback' | null; mensaje: string }>({ tipo: null, mensaje: '' });
+  const [loading, setLoading] = useState<'venta' | 'rollback' | null>(null);
+
+  const probar = async (endpoint: '/api/admin/venta' | '/api/admin/venta-rollback', tipo: 'venta' | 'rollback') => {
+    setLoading(tipo);
+    setResultado({ tipo: null, mensaje: '' });
+    try {
+      const res = await fetch(endpoint, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        setResultado({ tipo: 'exito', mensaje: `✓ COMMIT exitoso — ${JSON.stringify(data)}` });
+      } else {
+        setResultado({ tipo: 'rollback', mensaje: `✗ ROLLBACK ejecutado — ${data.detail}` });
+      }
+    } catch {
+      setResultado({ tipo: 'rollback', mensaje: 'Error de conexión' });
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  return (
+    <div style={{ marginTop: '2rem', background: '#0d0f22', border: '1px solid #1c2040', borderRadius: 12, padding: '1.5rem' }}>
+      <h3 style={{ margin: '0 0 .5rem', color: '#dde4f5', fontSize: '1rem' }}>Demostración de Transacciones</h3>
+      <p style={{ margin: '0 0 1.25rem', color: '#5a6485', fontSize: '.85rem' }}>
+        Prueba una transacción exitosa (COMMIT) o una fallida (ROLLBACK por constraint violado).
+      </p>
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <button
+          onClick={() => probar('/api/admin/venta', 'venta')}
+          disabled={loading !== null}
+          style={{ background: 'rgba(16,185,129,.15)', border: '1px solid rgba(16,185,129,.35)', color: '#34d399', borderRadius: 8, padding: '8px 20px', fontWeight: 600, cursor: 'pointer', fontSize: '.875rem' }}
+        >
+          {loading === 'venta' ? 'Procesando...' : 'Probar COMMIT'}
+        </button>
+        <button
+          onClick={() => probar('/api/admin/venta-rollback', 'rollback')}
+          disabled={loading !== null}
+          style={{ background: 'rgba(248,113,113,.12)', border: '1px solid rgba(248,113,113,.35)', color: '#f87171', borderRadius: 8, padding: '8px 20px', fontWeight: 600, cursor: 'pointer', fontSize: '.875rem' }}
+        >
+          {loading === 'rollback' ? 'Procesando...' : 'Probar ROLLBACK'}
+        </button>
+      </div>
+      {resultado.tipo && (
+        <div style={{
+          marginTop: '1rem', padding: '12px 16px', borderRadius: 8, fontSize: '.82rem', fontFamily: 'monospace', wordBreak: 'break-all',
+          background: resultado.tipo === 'exito' ? 'rgba(16,185,129,.1)' : 'rgba(248,113,113,.1)',
+          border: `1px solid ${resultado.tipo === 'exito' ? 'rgba(16,185,129,.3)' : 'rgba(248,113,113,.3)'}`,
+          color: resultado.tipo === 'exito' ? '#34d399' : '#f87171',
+        }}>
+          {resultado.mensaje}
+        </div>
+      )}
+    </div>
   );
 }
