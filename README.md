@@ -83,6 +83,14 @@ DB_NAME=tienda                   # Mismo que POSTGRES_DB
 API_URL=http://backend:8000      # URL del API (no cambiar en Docker)
 ```
 
+**Credenciales de acceso a la aplicación:**
+
+| Rol | URL | Usuario | Contraseña |
+|---|---|---|---|
+| Administrador | http://localhost:3000/admin/login | `admin` | `admin1234` |
+| Cliente (tienda) | http://localhost:3000/registro | Crear cuenta nueva | — |
+| Base de datos | puerto 5432 | `proy2` | `secret` |
+
 ⚠️ **Importante**: No commitar `.env` a Git. El archivo está incluido en `.gitignore`.
 
 ## Bajar el proyecto
