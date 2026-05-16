@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const host = request.headers.get('host') || 'localhost:3000';
-  const form = await request.formData();
+  const host  = request.headers.get('host') || 'localhost:3000';
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const bp    = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+  const form  = await request.formData();
   const action = form.get('_action') as string;
   const redirectPath = (form.get('_redirect') as string) || '/productos';
-  const base = `http://${host}${redirectPath}`;
+  const base = `${proto}://${host}${bp}${redirectPath}`;
 
   const body = {
     name:        (form.get('name') as string)?.trim(),

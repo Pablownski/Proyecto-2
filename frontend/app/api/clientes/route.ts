@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const host = request.headers.get('host') || 'localhost:3000';
-  const form = await request.formData();
+  const host  = request.headers.get('host') || 'localhost:3000';
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const bp    = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+  const base  = `${proto}://${host}${bp}/gestion-clientes`;
+
+  const form   = await request.formData();
   const action = form.get('_action') as string;
-  const redirect = (form.get('_redirect') as string) || '/gestion-clientes';
-  const base = `http://${host}${redirect}`;
 
   const body = {
     name:  (form.get('name') as string)?.trim(),
@@ -14,7 +16,20 @@ export async function POST(request: Request) {
     phone: (form.get('phone') as string)?.trim(),
   };
 
-  // Validación básica
+  if (action === 'eliminar') {
+    const id = form.get('id');
+    try {
+      const res = await fetch(`${process.env.API_URL}/cliente/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const e = await res.json();
+        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}`);
+      }
+      return NextResponse.redirect(`${base}?success=Cliente+eliminado`);
+    } catch (e: any) {
+      return NextResponse.redirect(`${base}?error=${encodeURIComponent(String(e))}`);
+    }
+  }
+
   if (!body.name || !body.email || !body.phone) {
     return NextResponse.redirect(`${base}?error=${encodeURIComponent('Nombre, email y teléfono son obligatorios.')}&add=1`);
   }
@@ -46,16 +61,6 @@ export async function POST(request: Request) {
         return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}&edit=${id}`);
       }
       return NextResponse.redirect(`${base}?success=Cliente+actualizado+exitosamente`);
-    }
-
-    if (action === 'eliminar') {
-      const id = form.get('id');
-      const res = await fetch(`${process.env.API_URL}/cliente/${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const e = await res.json();
-        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}`);
-      }
-      return NextResponse.redirect(`${base}?success=Cliente+eliminado`);
     }
   } catch (e: any) {
     return NextResponse.redirect(`${base}?error=${encodeURIComponent(String(e))}`);

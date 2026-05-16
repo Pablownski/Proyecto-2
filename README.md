@@ -48,11 +48,38 @@ docker-compose up --build -d
 
 Esperar ~60 segundos a que los tres servicios estén listos.
 
-| Servicio | URL |
-|---|---|
-| Frontend (Next.js) | http://localhost:3000 |
-| Backend (FastAPI) | http://localhost:8000 |
-| Docs API (Swagger) | http://localhost:8000/docs |
+**Tienda (clientes)**
+
+| Página | Local | Servidor |
+|---|---|---|
+| Inicio | http://localhost:3000 | https://cuchito.live/juanpa/E-commerce |
+| Login | http://localhost:3000/login | https://cuchito.live/juanpa/E-commerce/login |
+| Registro | http://localhost:3000/registro | https://cuchito.live/juanpa/E-commerce/registro |
+| Productos | http://localhost:3000/productos | https://cuchito.live/juanpa/E-commerce/productos |
+| Carrito | http://localhost:3000/carrito | https://cuchito.live/juanpa/E-commerce/carrito |
+| Gestión de clientes | http://localhost:3000/gestion-clientes | https://cuchito.live/juanpa/E-commerce/gestion-clientes |
+| Reporte | http://localhost:3000/reporte | https://cuchito.live/juanpa/E-commerce/reporte |
+
+**Panel de administración**
+
+| Página | Local | Servidor |
+|---|---|---|
+| Login admin | http://localhost:3000/admin/login | https://cuchito.live/juanpa/E-commerce/admin/login |
+| Dashboard | http://localhost:3000/admin | https://cuchito.live/juanpa/E-commerce/admin |
+| Gestión de productos | http://localhost:3000/admin/productos | https://cuchito.live/juanpa/E-commerce/admin/productos |
+| Gestión de clientes | http://localhost:3000/admin/gestion-clientes | https://cuchito.live/juanpa/E-commerce/admin/gestion-clientes |
+| Ventas | http://localhost:3000/admin/ventas | https://cuchito.live/juanpa/E-commerce/admin/ventas |
+| Detalle de ventas | http://localhost:3000/admin/detalle | https://cuchito.live/juanpa/E-commerce/admin/detalle |
+| Top clientes | http://localhost:3000/admin/clientes | https://cuchito.live/juanpa/E-commerce/admin/clientes |
+| Ranking productos | http://localhost:3000/admin/ranking | https://cuchito.live/juanpa/E-commerce/admin/ranking |
+| Reporte | http://localhost:3000/admin/reporte | https://cuchito.live/juanpa/E-commerce/admin/reporte |
+
+**Backend**
+
+| Servicio | Local | Servidor |
+|---|---|---|
+| Backend (FastAPI) | http://localhost:8000 | — |
+| Docs API (Swagger) | http://localhost:8000/docs | — |
 
 ## Configuración de credenciales (.env)
 
@@ -85,11 +112,11 @@ API_URL=http://backend:8000      # URL del API (no cambiar en Docker)
 
 **Credenciales de acceso a la aplicación:**
 
-| Rol | URL | Usuario | Contraseña |
-|---|---|---|---|
-| Administrador | http://localhost:3000/admin/login | `admin` | `admin1234` |
-| Cliente (tienda) | http://localhost:3000/registro | Crear cuenta nueva | — |
-| Base de datos | puerto 5432 | `proy2` | `secret` |
+| Rol | Local | Servidor | Usuario | Contraseña |
+|---|---|---|---|---|
+| Administrador | http://localhost:3000/admin/login | https://cuchito.live/juanpa/E-commerce/admin/login | `admin` | `admin1234` |
+| Cliente (tienda) | http://localhost:3000/registro | https://cuchito.live/juanpa/E-commerce/registro | Crear cuenta nueva | — |
+| Base de datos | puerto 5432 | — | `proy2` | `secret` |
 
 ⚠️ **Importante**: No commitar `.env` a Git. El archivo está incluido en `.gitignore`.
 
