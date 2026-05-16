@@ -19,7 +19,7 @@ export default async function Page() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>Reporte de Ventas</h1>
         <a href="/api/reporte/csv" download="reporte_ventas.csv" className="btn btn-success btn-sm">
-          ⬇ Descargar CSV
+          Descargar CSV
         </a>
       </div>
       <p style={{ color: 'var(--muted)', fontSize: '.875rem', marginBottom: '1rem' }}>

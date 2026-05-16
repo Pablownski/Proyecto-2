@@ -5,23 +5,25 @@ export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
   const form = await request.formData();
   const action = form.get('_action') as string;
-  const base = `http://${host}/productos`;
+  const redirectPath = (form.get('_redirect') as string) || '/productos';
+  const base = `http://${host}${redirectPath}`;
 
   const body = {
     name:        (form.get('name') as string)?.trim(),
-    description: (form.get('description') as string)?.trim(),
+    description: (form.get('description') as string)?.trim() || '',
     price:       parseFloat(form.get('price') as string),
     stock:       parseInt(form.get('stock') as string),
     category_id: parseInt(form.get('category_id') as string),
     supplier_id: parseInt(form.get('supplier_id') as string),
   };
 
-  // Validación básica
-  if (!body.name || isNaN(body.price) || isNaN(body.stock)) {
-    return NextResponse.redirect(`${base}?error=${encodeURIComponent('Nombre, precio y stock son obligatorios.')}&add=1`);
-  }
-  if (body.price < 0 || body.stock < 0) {
-    return NextResponse.redirect(`${base}?error=${encodeURIComponent('Precio y stock no pueden ser negativos.')}&add=1`);
+  if (action !== 'eliminar') {
+    if (!body.name || isNaN(body.price) || isNaN(body.stock)) {
+      return NextResponse.redirect(`${base}?error=${encodeURIComponent('Nombre, precio y stock son obligatorios.')}&add=1`, { status: 303 });
+    }
+    if (body.price < 0 || body.stock < 0) {
+      return NextResponse.redirect(`${base}?error=${encodeURIComponent('Precio y stock no pueden ser negativos.')}&add=1`, { status: 303 });
+    }
   }
 
   try {
@@ -32,9 +34,9 @@ export async function POST(request: Request) {
       });
       if (!res.ok) {
         const e = await res.json();
-        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}&add=1`);
+        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}&add=1`, { status: 303 });
       }
-      return NextResponse.redirect(`${base}?success=Producto+creado+exitosamente`);
+      return NextResponse.redirect(`${base}?success=Producto+creado+exitosamente`, { status: 303 });
     }
 
     if (action === 'editar') {
@@ -45,9 +47,9 @@ export async function POST(request: Request) {
       });
       if (!res.ok) {
         const e = await res.json();
-        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}&edit=${id}`);
+        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}&edit=${id}`, { status: 303 });
       }
-      return NextResponse.redirect(`${base}?success=Producto+actualizado+exitosamente`);
+      return NextResponse.redirect(`${base}?success=Producto+actualizado+exitosamente`, { status: 303 });
     }
 
     if (action === 'eliminar') {
@@ -55,13 +57,13 @@ export async function POST(request: Request) {
       const res = await fetch(`${process.env.API_URL}/producto/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const e = await res.json();
-        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}`);
+        return NextResponse.redirect(`${base}?error=${encodeURIComponent(e.detail)}`, { status: 303 });
       }
-      return NextResponse.redirect(`${base}?success=Producto+eliminado`);
+      return NextResponse.redirect(`${base}?success=Producto+eliminado`, { status: 303 });
     }
-  } catch (e: any) {
-    return NextResponse.redirect(`${base}?error=${encodeURIComponent(String(e))}`);
+  } catch (e: unknown) {
+    return NextResponse.redirect(`${base}?error=${encodeURIComponent(String(e))}`, { status: 303 });
   }
 
-  return NextResponse.redirect(base);
+  return NextResponse.redirect(base, { status: 303 });
 }

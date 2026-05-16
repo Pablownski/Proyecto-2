@@ -30,7 +30,7 @@ export default async function Page() {
               ) : data.map((r: any, i: number) => (
                 <tr key={i}>
                   <td style={{ color: 'var(--muted)', fontWeight: 600 }}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
+                    {i + 1}
                   </td>
                   <td><strong>{r[0]}</strong></td>
                   <td>{r[1]} unidades</td>

@@ -14,11 +14,12 @@ async function fetchJSON(url: string) {
   }
 }
 
-export default async function Page({ searchParams }: { searchParams: SP }) {
+export default async function Page({ searchParams }: { searchParams: Promise<SP> }) {
+  const sp = await searchParams;
   const clientes = await fetchJSON(`${process.env.API_URL}/cliente`);
 
-  const editId = searchParams.edit ? parseInt(searchParams.edit) : null;
-  const showAdd = searchParams.add === '1';
+  const editId = sp.edit ? parseInt(sp.edit) : null;
+  const showAdd = sp.add === '1';
 
   let editData: any = null;
   if (editId) {
@@ -28,17 +29,17 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <h1 style={{ margin: 0 }}>👥 Gestión de Clientes</h1>
+        <h1 style={{ margin: 0 }}>Gestión de Clientes</h1>
         {!showAdd && !editId && (
           <a href="/gestion-clientes?add=1" className="btn btn-success btn-sm">＋ Agregar Cliente</a>
         )}
       </div>
 
-      {searchParams.success && (
-        <div className="alert alert-success"> {decodeURIComponent(searchParams.success)}</div>
+      {sp.success && (
+        <div className="alert alert-success"> {decodeURIComponent(sp.success)}</div>
       )}
-      {searchParams.error && (
-        <div className="alert alert-error"> {decodeURIComponent(searchParams.error)}</div>
+      {sp.error && (
+        <div className="alert alert-error"> {decodeURIComponent(sp.error)}</div>
       )}
 
       {/* ── FORM CREAR ── */}
@@ -98,7 +99,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <td>{r[3]}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '.4rem' }}>
-                      <a href={`/gestion-clientes?edit=${r[0]}`} className="btn btn-warning btn-sm">✏️ Editar</a>
+                      <a href={`/gestion-clientes?edit=${r[0]}`} className="btn btn-warning btn-sm">Editar</a>
                       <DeleteClienteForm id={r[0]} />
                     </div>
                   </td>

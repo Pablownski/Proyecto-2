@@ -5,7 +5,8 @@ export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
   const form = await request.formData();
   const action = form.get('_action') as string;
-  const base = `http://${host}/gestion-clientes`;
+  const redirect = (form.get('_redirect') as string) || '/gestion-clientes';
+  const base = `http://${host}${redirect}`;
 
   const body = {
     name:  (form.get('name') as string)?.trim(),
