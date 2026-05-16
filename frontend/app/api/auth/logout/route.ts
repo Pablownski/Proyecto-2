@@ -4,6 +4,8 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
   const token = (await cookies()).get('session_token')?.value;
 
   if (token) {
@@ -14,7 +16,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const response = NextResponse.redirect(`http://${host}/login`);
+  const response = NextResponse.redirect(`${proto}://${host}${bp}/login`);
   response.cookies.delete('session_token');
   response.cookies.delete('username');
   return response;

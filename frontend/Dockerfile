@@ -8,6 +8,9 @@ RUN npm install
 
 COPY . .
 
+ARG NEXT_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_BASE_PATH}
+
 RUN npm run build
 
 # ---------- RUN ----------

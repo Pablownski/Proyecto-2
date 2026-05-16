@@ -28,7 +28,10 @@ services:
       - "8000:8000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_BASE_PATH: ${NEXT_BASE_PATH:-}
     container_name: frontend
     depends_on:
       - backend

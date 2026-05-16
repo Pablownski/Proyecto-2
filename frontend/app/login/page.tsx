@@ -76,7 +76,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </div>
         )}
 
-        <form action="/api/auth/login" method="post">
+        <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/auth/login`} method="post">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
               <label style={{ color: '#5a6485', fontSize: '.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>

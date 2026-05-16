@@ -44,7 +44,7 @@ export default async function AdminLoginPage({ searchParams }: { searchParams: P
           </div>
         )}
 
-        <form action="/api/admin/login" method="post">
+        <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/login`} method="post">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
               <label style={{ color: 'rgba(255,255,255,.6)', fontSize: '.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>

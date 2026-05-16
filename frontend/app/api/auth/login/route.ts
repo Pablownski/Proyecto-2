@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
   const form = await request.formData();
   const username = (form.get('username') as string)?.trim();
   const password = form.get('password') as string;
@@ -10,7 +13,7 @@ export async function POST(request: Request) {
   const userParam = username ? `&username=${encodeURIComponent(username)}` : '';
 
   if (!username || !password) {
-    return NextResponse.redirect(`http://${host}/login?error=${encodeURIComponent('Usuario y contraseña requeridos.')}${userParam}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/login?error=${encodeURIComponent('Usuario y contraseña requeridos.')}${userParam}`);
   }
 
   try {
@@ -22,11 +25,11 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       const e = await res.json();
-      return NextResponse.redirect(`http://${host}/login?error=${encodeURIComponent(e.detail)}${userParam}`);
+      return NextResponse.redirect(`${proto}://${host}${bp}/login?error=${encodeURIComponent(e.detail)}${userParam}`);
     }
 
     const data = await res.json();
-    const response = NextResponse.redirect(`http://${host}/`);
+    const response = NextResponse.redirect(`${proto}://${host}${bp}/`);
     response.cookies.set('session_token', data.token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -38,6 +41,6 @@ export async function POST(request: Request) {
     });
     return response;
   } catch {
-    return NextResponse.redirect(`http://${host}/login?error=${encodeURIComponent('Error de conexión con el servidor.')}${userParam}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/login?error=${encodeURIComponent('Error de conexión con el servidor.')}${userParam}`);
   }
 }

@@ -74,7 +74,7 @@ export default function ProductoForm({ mode, id, categorias, proveedores, initia
 
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/producto', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/producto`, {
         method: mode === 'crear' ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

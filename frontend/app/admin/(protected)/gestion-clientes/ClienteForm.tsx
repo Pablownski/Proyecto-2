@@ -55,7 +55,7 @@ export default function ClienteForm({ mode, id, initial }: Props) {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/cliente', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/cliente`, {
         method: mode === 'crear' ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...fields, ...(mode === 'editar' ? { id } : {}) }),

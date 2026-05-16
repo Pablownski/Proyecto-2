@@ -89,11 +89,12 @@ export default function AdminPage() {
   const fetchDashboard = useCallback(async () => {
     dispatch({ type: 'FETCH_START' });
     try {
+      const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
       const [resumenRes, mesRes, stockRes, rankRes] = await Promise.all([
-        fetch('/api/stats/resumen'),
-        fetch('/api/stats/ventas-por-mes'),
-        fetch('/api/stats/stock-por-categoria'),
-        fetch('/api/stats/ranking'),
+        fetch(`${bp}/api/stats/resumen`),
+        fetch(`${bp}/api/stats/ventas-por-mes`),
+        fetch(`${bp}/api/stats/stock-por-categoria`),
+        fetch(`${bp}/api/stats/ranking`),
       ]);
 
       if (!resumenRes.ok || !mesRes.ok || !stockRes.ok || !rankRes.ok) {
@@ -324,8 +325,9 @@ function TransaccionDemo() {
   const probar = async (endpoint: '/api/admin/venta' | '/api/admin/venta-rollback', tipo: 'venta' | 'rollback') => {
     setLoading(tipo);
     setResultado({ tipo: null, mensaje: '' });
+    const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
     try {
-      const res = await fetch(endpoint, { method: 'POST' });
+      const res = await fetch(`${bp}${endpoint}`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setResultado({ tipo: 'exito', mensaje: `✓ COMMIT exitoso — ${JSON.stringify(data)}` });

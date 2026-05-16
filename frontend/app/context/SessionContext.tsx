@@ -24,9 +24,10 @@ export function SessionProvider({
   const [username, setUsername] = useState<string | null>(initialUsername);
 
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
+    const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+    await fetch(`${bp}/api/auth/logout`, { method: 'POST' });
     setUsername(null);
-    window.location.href = '/login';
+    window.location.href = `${bp}/login`;
   }, []);
 
   return (

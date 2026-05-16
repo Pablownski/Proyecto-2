@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
   const host = request.headers.get('host') || 'localhost:3000';
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
+
   const form = await request.formData();
   const username = (form.get('username') as string)?.trim();
   const password = form.get('password') as string;
@@ -12,16 +15,16 @@ export async function POST(request: Request) {
   const phone = (form.get('phone') as string)?.trim();
 
   if (!username || !password) {
-    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Usuario y contraseña requeridos.')}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent('Usuario y contraseña requeridos.')}`);
   }
   if (!name || !email || !phone) {
-    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Nombre, email y teléfono son obligatorios.')}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent('Nombre, email y teléfono son obligatorios.')}`);
   }
   if (password.length < 6) {
-    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('La contraseña debe tener al menos 6 caracteres.')}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent('La contraseña debe tener al menos 6 caracteres.')}`);
   }
   if (password !== confirm) {
-    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Las contraseñas no coinciden.')}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent('Las contraseñas no coinciden.')}`);
   }
 
   try {
@@ -33,11 +36,11 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       const e = await res.json();
-      return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent(e.detail)}`);
+      return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent(e.detail)}`);
     }
 
     const data = await res.json();
-    const response = NextResponse.redirect(`http://${host}/`);
+    const response = NextResponse.redirect(`${proto}://${host}${bp}/`);
     response.cookies.set('session_token', data.token, {
       httpOnly: true,
       sameSite: 'lax',
@@ -49,6 +52,6 @@ export async function POST(request: Request) {
     });
     return response;
   } catch {
-    return NextResponse.redirect(`http://${host}/registro?error=${encodeURIComponent('Error de conexión con el servidor.')}`);
+    return NextResponse.redirect(`${proto}://${host}${bp}/registro?error=${encodeURIComponent('Error de conexión con el servidor.')}`);
   }
 }

@@ -40,7 +40,7 @@ export default function RegistroForm({ serverError }: { serverError?: string }) 
   const error = clientError || serverError;
 
   return (
-    <form action="/api/auth/registro" method="post" onSubmit={handleSubmit}>
+    <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/auth/registro`} method="post" onSubmit={handleSubmit}>
       {error && (
         <div className="alert alert-error" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'flex-start', gap: '.5rem' }}>
           <span style={{ fontSize: '1rem', flexShrink: 0 }}></span>

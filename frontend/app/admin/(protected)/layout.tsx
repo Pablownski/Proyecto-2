@@ -31,7 +31,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <a key={href} href={href}>{label}</a>
             ))}
             <span style={{ marginLeft: 'auto' }}>
-              <form action="/api/admin/logout" method="post" className="admin-logout-form">
+              <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/logout`} method="post" className="admin-logout-form">
                 <button type="submit" style={{
                   background: 'transparent',
                   border: '1px solid rgba(255,255,255,.35)',
@@ -68,7 +68,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <a key={href} href={href} onClick={close}>{label}</a>
             ))}
             <div className="nav-drawer-divider" />
-            <form action="/api/admin/logout" method="post" className="admin-logout-form">
+            <form action={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/admin/logout`} method="post" className="admin-logout-form">
               <button type="submit" className="admin-drawer-logout">
                 Cerrar sesión
               </button>

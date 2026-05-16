@@ -48,7 +48,7 @@ export default function ProductosTable({ editId }: Props) {
   const fetchProductos = useCallback(async (showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
     try {
-      const res = await fetch('/api/productos-lista', { cache: 'no-store' });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/productos-lista`, { cache: 'no-store' });
       if (!res.ok) return;
       const data = await res.json();
       setProductos(data.map(mapRow));

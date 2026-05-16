@@ -22,7 +22,7 @@ export default function CarritoPage() {
     if (items.length === 0 || loading) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/compra', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/api/compra`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
