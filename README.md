@@ -6,6 +6,39 @@ Sistema de gestión de tienda con PostgreSQL, FastAPI y Next.js, desplegado con 
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y corriendo
 
+## Pruebas unitarias
+
+Las pruebas corren con **Vitest** y cubren la lógica de negocio del frontend.
+
+```bash
+cd frontend
+npm install
+npm run test
+```
+
+Resultado esperado:
+
+```
+✓ lib/utils.test.ts (9 tests)
+
+Test Files  1 passed (1)
+      Tests  9 passed (9)
+```
+
+Las pruebas verifican:
+- `formatPrice` — formato de precios con prefijo Q y dos decimales
+- `getStockStatus` — clasificación de stock en Sin stock / Bajo / OK
+- `calcCartTotal` — cálculo correcto del total del carrito
+
+## Linter
+
+```bash
+cd frontend
+npm run lint
+```
+
+Resultado esperado: `✔ No ESLint warnings or errors`
+
 ## Levantar el proyecto
 
 ```bash
@@ -95,10 +128,108 @@ docker-compose down -v
 | VIEW `reporte_ventas` | `GET /reporte` | `/reporte` |
 | Transacción explícita + ROLLBACK | `POST /venta`, `POST /venta-rollback` | `/` |
 
+## Documentación de la API REST
+
+La documentación interactiva (Swagger UI) está disponible en **http://localhost:8000/docs** una vez levantado el proyecto.
+
+### Autenticación
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `POST` | `/auth/login` | Iniciar sesión. Body: `{ "username": "...", "password": "..." }` → `{ "token": "...", "username": "...", "customer_id": N }` |
+| `POST` | `/auth/register` | Registrar usuario. Body: `{ "username", "password", "name", "email", "phone" }` → `{ "token", "username", "customer_id" }` |
+| `POST` | `/auth/logout` | Cerrar sesión. Query: `?token=<uuid>` |
+| `GET`  | `/auth/verify` | Verificar token. Query: `?token=<uuid>` → `{ "username": "..." }` |
+
+### Productos (CRUD completo)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET`    | `/productos` | Listar todos los productos con categoría y proveedor |
+| `POST`   | `/producto` | Crear producto. Body: `{ "name", "description", "price", "stock", "category_id", "supplier_id" }` → `{ "id": N }` |
+| `PUT`    | `/producto/{id}` | Actualizar producto. Body: mismo que POST |
+| `DELETE` | `/producto/{id}` | Eliminar producto. Error 409 si tiene ventas registradas |
+
+**Ejemplo `POST /producto`:**
+```json
+{
+  "name": "Laptop HP 15",
+  "description": "Intel i5, 8GB RAM",
+  "price": 4500.00,
+  "stock": 10,
+  "category_id": 14,
+  "supplier_id": 5
+}
+```
+
+### Clientes (CRUD completo)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET`    | `/cliente` | Listar todos los clientes |
+| `POST`   | `/cliente` | Crear cliente. Body: `{ "name", "email", "phone" }` → `{ "id": N }` |
+| `PUT`    | `/cliente/{id}` | Actualizar cliente. Body: mismo que POST |
+| `DELETE` | `/cliente/{id}` | Eliminar cliente |
+
+### Ventas y Reportes
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/ventas` | Ventas con cliente y empleado (JOIN) |
+| `GET` | `/detalle` | Detalle de ventas con producto (JOIN) |
+| `GET` | `/clientes-top` | Clientes con mayor gasto — `GROUP BY + HAVING + SUM` |
+| `GET` | `/ranking` | Ranking de productos más vendidos — CTE (`WITH`) |
+| `GET` | `/reporte` | Reporte consolidado desde VIEW `reporte_ventas` |
+| `GET` | `/top-productos` | Productos vendidos más de 5 unidades — Subquery `IN` |
+| `GET` | `/ventas-bulto` | Ventas con artículos en bulto — Subquery `EXISTS` |
+| `POST` | `/compra` | Realizar compra (transacción explícita con rollback automático si falla stock). Body: `{ "items": [{ "product_id": N, "quantity": N }], "session_token": "..." }` |
+
+**Ejemplo `POST /compra`:**
+```json
+{
+  "items": [
+    { "product_id": 3, "quantity": 2 },
+    { "product_id": 7, "quantity": 1 }
+  ],
+  "session_token": "uuid-del-usuario-logueado"
+}
+```
+Respuesta: `{ "sale_id": 30, "total": 942.00 }`
+
+### Estadísticas (datos agregados)
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/stats/dashboard` | KPIs: total ventas, ingresos, productos, clientes |
+| `GET` | `/stats/ventas-por-mes` | Ventas agrupadas por mes para gráfica |
+| `GET` | `/stats/top-categorias` | Categorías con más productos |
+
+**Ejemplo respuesta `/stats/dashboard`:**
+```json
+{
+  "total_ventas": 29,
+  "ingresos_totales": 34521.50,
+  "total_productos": 25,
+  "total_clientes": 26
+}
+```
+
+### Códigos HTTP utilizados
+
+| Código | Significado |
+|--------|-------------|
+| `200` | OK — operación exitosa |
+| `201` | Created — recurso creado |
+| `400` | Bad Request — datos inválidos |
+| `401` | Unauthorized — credenciales incorrectas |
+| `404` | Not Found — recurso no encontrado |
+| `409` | Conflict — violación de FK (ej. eliminar producto con ventas) |
+| `500` | Internal Server Error — error inesperado del servidor |
+
 ## CRUD disponible
 
-- **Productos** (`/productos`): crear, listar, editar, eliminar
-- **Clientes** (`/gestion-clientes`): crear, listar, editar, eliminar
+- **Productos** (`/admin/productos`): crear, listar, editar, eliminar
+- **Clientes** (`/admin/gestion-clientes`): crear, listar, editar, eliminar
 
 ## Variables de entorno
 
