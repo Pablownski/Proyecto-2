@@ -50,36 +50,38 @@ Esperar ~60 segundos a que los tres servicios estén listos.
 
 **Tienda (clientes)**
 
-| Página | Local | Servidor |
-|---|---|---|
-| Inicio | http://localhost:3000 | https://cuchito.live/juanpa/E-commerce |
-| Login | http://localhost:3000/login | https://cuchito.live/juanpa/E-commerce/login |
-| Registro | http://localhost:3000/registro | https://cuchito.live/juanpa/E-commerce/registro |
-| Productos | http://localhost:3000/productos | https://cuchito.live/juanpa/E-commerce/productos |
-| Carrito | http://localhost:3000/carrito | https://cuchito.live/juanpa/E-commerce/carrito |
-| Gestión de clientes | http://localhost:3000/gestion-clientes | https://cuchito.live/juanpa/E-commerce/gestion-clientes |
-| Reporte | http://localhost:3000/reporte | https://cuchito.live/juanpa/E-commerce/reporte |
+| Página | URL |
+|---|---|
+| Inicio | https://cuchito.live/juanpa/E-commerce |
+| Login | https://cuchito.live/juanpa/E-commerce/login |
+| Registro | https://cuchito.live/juanpa/E-commerce/registro |
+| Productos | https://cuchito.live/juanpa/E-commerce/productos |
+| Carrito | https://cuchito.live/juanpa/E-commerce/carrito |
+| Gestión de clientes | https://cuchito.live/juanpa/E-commerce/gestion-clientes |
+| Reporte | https://cuchito.live/juanpa/E-commerce/reporte |
 
 **Panel de administración**
 
-| Página | Local | Servidor |
-|---|---|---|
-| Login admin | http://localhost:3000/admin/login | https://cuchito.live/juanpa/E-commerce/admin/login |
-| Dashboard | http://localhost:3000/admin | https://cuchito.live/juanpa/E-commerce/admin |
-| Gestión de productos | http://localhost:3000/admin/productos | https://cuchito.live/juanpa/E-commerce/admin/productos |
-| Gestión de clientes | http://localhost:3000/admin/gestion-clientes | https://cuchito.live/juanpa/E-commerce/admin/gestion-clientes |
-| Ventas | http://localhost:3000/admin/ventas | https://cuchito.live/juanpa/E-commerce/admin/ventas |
-| Detalle de ventas | http://localhost:3000/admin/detalle | https://cuchito.live/juanpa/E-commerce/admin/detalle |
-| Top clientes | http://localhost:3000/admin/clientes | https://cuchito.live/juanpa/E-commerce/admin/clientes |
-| Ranking productos | http://localhost:3000/admin/ranking | https://cuchito.live/juanpa/E-commerce/admin/ranking |
-| Reporte | http://localhost:3000/admin/reporte | https://cuchito.live/juanpa/E-commerce/admin/reporte |
+| Página | URL |
+|---|---|
+| Login admin | https://cuchito.live/juanpa/E-commerce/admin/login |
+| Dashboard | https://cuchito.live/juanpa/E-commerce/admin |
+| Gestión de productos | https://cuchito.live/juanpa/E-commerce/admin/productos |
+| Gestión de clientes | https://cuchito.live/juanpa/E-commerce/admin/gestion-clientes |
+| Ventas | https://cuchito.live/juanpa/E-commerce/admin/ventas |
+| Detalle de ventas | https://cuchito.live/juanpa/E-commerce/admin/detalle |
+| Top clientes | https://cuchito.live/juanpa/E-commerce/admin/clientes |
+| Ranking productos | https://cuchito.live/juanpa/E-commerce/admin/ranking |
+| Reporte | https://cuchito.live/juanpa/E-commerce/admin/reporte |
 
-**Backend**
+> Para desarrollo local, reemplaza `https://cuchito.live/juanpa/E-commerce` por `http://localhost:3000`
 
-| Servicio | Local | Servidor |
-|---|---|---|
-| Backend (FastAPI) | http://localhost:8000 | — |
-| Docs API (Swagger) | http://localhost:8000/docs | — |
+**Backend (solo local)**
+
+| Servicio | URL |
+|---|---|
+| FastAPI | http://localhost:8000 |
+| Swagger UI | http://localhost:8000/docs |
 
 ## Configuración de credenciales (.env)
 
