@@ -135,6 +135,32 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
         <div style={{ height: 1, background: 'rgba(124,111,250,.12)', margin: '1.5rem 0' }} />
 
+        {/* Usuarios de prueba por rol */}
+        <details style={{ marginBottom: '1rem' }}>
+          <summary style={{ color: '#5a6485', fontSize: '.75rem', cursor: 'pointer', userSelect: 'none' }}>
+            Usuarios de prueba (Proyecto 3)
+          </summary>
+          <div style={{ marginTop: '.75rem', display: 'flex', flexDirection: 'column', gap: '.35rem' }}>
+            {[
+              { user: 'admin_user',     pass: 'admin123',     rol: 'admin'           },
+              { user: 'inventory_user', pass: 'inventory123', rol: 'inventory'       },
+              { user: 'sales_user',     pass: 'sales123',     rol: 'sales'           },
+              { user: 'report_user',    pass: 'report123',    rol: 'reporting'       },
+              { user: 'service_user',   pass: 'service123',   rol: 'customer_service'},
+            ].map(({ user, pass, rol }) => (
+              <div key={user} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'rgba(124,111,250,.06)', borderRadius: 6, padding: '5px 10px',
+                fontSize: '.72rem',
+              }}>
+                <span style={{ color: '#a89dfc', fontWeight: 600 }}>{user}</span>
+                <span style={{ color: '#5a6485' }}>{pass}</span>
+                <span style={{ color: '#4ade80', fontSize: '.68rem' }}>{rol}</span>
+              </div>
+            ))}
+          </div>
+        </details>
+
         <p style={{ textAlign: 'center', fontSize: '.875rem', color: '#5a6485' }}>
           ¿No tienes cuenta?{' '}
           <Link href="/registro" style={{ color: '#a89dfc', fontWeight: 600, textDecoration: 'none' }}>
@@ -142,11 +168,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </Link>
         </p>
 
-        <p style={{ textAlign: 'center', marginTop: '.75rem', fontSize: '.8rem' }}>
-          <Link href="/admin/login" style={{ color: 'rgba(245,166,35,.5)', textDecoration: 'none', fontSize: '.75rem' }}>
-            Acceso admin
-          </Link>
-        </p>
       </div>
     </div>
   );

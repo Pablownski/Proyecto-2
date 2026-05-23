@@ -19,5 +19,6 @@ export async function POST(request: Request) {
   const response = NextResponse.redirect(`${proto}://${host}${bp}/login`);
   response.cookies.delete('session_token');
   response.cookies.delete('username');
+  response.cookies.delete('user_role');
   return response;
 }
