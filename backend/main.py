@@ -1,8 +1,12 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 import psycopg2
+import json
 from db import get_connection
+from database import get_db
+from models import Categoria, Proveedor, Producto, Cliente
 
 app = FastAPI(
     title="Tienda GT — API REST",
@@ -54,17 +58,17 @@ def auth_login(data: LoginIn):
     cursor = conn.cursor()
     try:
         cursor.execute(
-            "SELECT user_id, customer_id FROM usuario WHERE username=%s AND password_hash=crypt(%s, password_hash);",
+            "SELECT user_id, customer_id, role FROM usuario WHERE username=%s AND password_hash=crypt(%s, password_hash);",
             (data.username, data.password)
         )
         row = cursor.fetchone()
         if not row:
             raise HTTPException(status_code=401, detail="Usuario o contraseña incorrectos")
-        user_id, customer_id = row[0], row[1]
+        user_id, customer_id, role = row[0], row[1], row[2]
         cursor.execute("INSERT INTO sesion (user_id) VALUES (%s) RETURNING token::text;", (user_id,))
         token = cursor.fetchone()[0]
         conn.commit()
-        return {"token": token, "username": data.username, "customer_id": customer_id}
+        return {"token": token, "username": data.username, "customer_id": customer_id, "role": role}
     except HTTPException:
         raise
     except Exception as e:
@@ -582,5 +586,249 @@ def venta_rollback():
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=422, detail=f"ROLLBACK ejecutado. Razón: {str(e)}")
+    finally:
+        conn.close()
+
+# ══════════════════════════════════════════════════════════════════════════════
+# ORM — CRUD con SQLAlchemy
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── ORM: Categorías ──────────────────────────────────────────────────────────
+@app.get("/orm/categorias")
+def orm_get_categorias(db: Session = Depends(get_db)):
+    cats = db.query(Categoria).order_by(Categoria.name).all()
+    return [{"category_id": c.category_id, "name": c.name} for c in cats]
+
+# ── ORM: Proveedores ─────────────────────────────────────────────────────────
+@app.get("/orm/proveedores")
+def orm_get_proveedores(db: Session = Depends(get_db)):
+    provs = db.query(Proveedor).order_by(Proveedor.name).all()
+    return [{"supplier_id": p.supplier_id, "name": p.name, "phone": p.phone, "email": p.email} for p in provs]
+
+# ── ORM: Productos ───────────────────────────────────────────────────────────
+@app.get("/orm/productos")
+def orm_get_productos(db: Session = Depends(get_db)):
+    prods = db.query(Producto).order_by(Producto.product_id).all()
+    return [
+        {
+            "product_id":    p.product_id,
+            "name":          p.name,
+            "description":   p.description,
+            "price":         float(p.price),
+            "stock":         p.stock,
+            "category_id":   p.category_id,
+            "category_name": p.categoria.name,
+            "supplier_id":   p.supplier_id,
+            "supplier_name": p.proveedor.name,
+        }
+        for p in prods
+    ]
+
+@app.get("/orm/producto/{producto_id}")
+def orm_get_producto(producto_id: int, db: Session = Depends(get_db)):
+    p = db.query(Producto).filter(Producto.product_id == producto_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    return {
+        "product_id": p.product_id, "name": p.name, "description": p.description,
+        "price": float(p.price), "stock": p.stock,
+        "category_id": p.category_id, "supplier_id": p.supplier_id,
+    }
+
+@app.post("/orm/producto")
+def orm_crear_producto(data: ProductoIn, db: Session = Depends(get_db)):
+    p = Producto(
+        name=data.name, description=data.description, price=data.price,
+        stock=data.stock, category_id=data.category_id, supplier_id=data.supplier_id,
+    )
+    db.add(p)
+    db.commit()
+    db.refresh(p)
+    return {"id": p.product_id}
+
+@app.put("/orm/producto/{producto_id}")
+def orm_actualizar_producto(producto_id: int, data: ProductoIn, db: Session = Depends(get_db)):
+    p = db.query(Producto).filter(Producto.product_id == producto_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    p.name = data.name; p.description = data.description; p.price = data.price
+    p.stock = data.stock; p.category_id = data.category_id; p.supplier_id = data.supplier_id
+    db.commit()
+    return {"ok": True}
+
+@app.delete("/orm/producto/{producto_id}")
+def orm_eliminar_producto(producto_id: int, db: Session = Depends(get_db)):
+    p = db.query(Producto).filter(Producto.product_id == producto_id).first()
+    if not p:
+        raise HTTPException(status_code=404, detail="Producto no encontrado")
+    try:
+        db.delete(p)
+        db.commit()
+        return {"ok": True}
+    except Exception as e:
+        db.rollback()
+        if "foreign key" in str(e).lower():
+            raise HTTPException(status_code=409, detail="No se puede eliminar: este producto tiene ventas registradas.")
+        raise HTTPException(status_code=400, detail=str(e))
+
+# ── ORM: Clientes ────────────────────────────────────────────────────────────
+@app.get("/orm/clientes")
+def orm_get_clientes(db: Session = Depends(get_db)):
+    clientes = db.query(Cliente).order_by(Cliente.customer_id).all()
+    return [{"customer_id": c.customer_id, "name": c.name, "email": c.email, "phone": c.phone} for c in clientes]
+
+@app.get("/orm/cliente/{cliente_id}")
+def orm_get_cliente(cliente_id: int, db: Session = Depends(get_db)):
+    c = db.query(Cliente).filter(Cliente.customer_id == cliente_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    return {"customer_id": c.customer_id, "name": c.name, "email": c.email, "phone": c.phone}
+
+@app.post("/orm/cliente")
+def orm_crear_cliente(data: ClienteIn, db: Session = Depends(get_db)):
+    c = Cliente(name=data.name, email=data.email, phone=data.phone)
+    db.add(c)
+    db.commit()
+    db.refresh(c)
+    return {"id": c.customer_id}
+
+@app.put("/orm/cliente/{cliente_id}")
+def orm_actualizar_cliente(cliente_id: int, data: ClienteIn, db: Session = Depends(get_db)):
+    c = db.query(Cliente).filter(Cliente.customer_id == cliente_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    c.name = data.name; c.email = data.email; c.phone = data.phone
+    db.commit()
+    return {"ok": True}
+
+@app.delete("/orm/cliente/{cliente_id}")
+def orm_eliminar_cliente(cliente_id: int, db: Session = Depends(get_db)):
+    c = db.query(Cliente).filter(Cliente.customer_id == cliente_id).first()
+    if not c:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    db.delete(c)
+    db.commit()
+    return {"ok": True}
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Stored Procedures
+# ══════════════════════════════════════════════════════════════════════════════
+
+class SpVentaItem(BaseModel):
+    product_id: int
+    quantity: int
+
+class SpVentaIn(BaseModel):
+    customer_id: int
+    items: list[SpVentaItem]
+
+class SpStockIn(BaseModel):
+    product_id: int
+    delta: int
+
+class SpCancelarIn(BaseModel):
+    sale_id: int
+
+@app.post("/sp/crear-venta")
+def sp_crear_venta(data: SpVentaIn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        conn.autocommit = False
+        cursor.execute("SELECT employee_id FROM empleado ORDER BY RANDOM() LIMIT 1;")
+        emp_row = cursor.fetchone()
+        employee_id = emp_row[0] if emp_row else 1
+
+        items_json = json.dumps([{"product_id": i.product_id, "quantity": i.quantity} for i in data.items])
+        cursor.execute(
+            "CALL sp_create_sale(%s, %s, %s::jsonb, NULL)",
+            [data.customer_id, employee_id, items_json],
+        )
+        result = cursor.fetchone()
+        sale_id = result[0]
+        conn.commit()
+        return {"sale_id": sale_id}
+    except HTTPException:
+        conn.rollback()
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+@app.post("/sp/actualizar-stock")
+def sp_actualizar_stock(data: SpStockIn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        conn.autocommit = False
+        cursor.execute("CALL sp_update_stock(%s, %s)", [data.product_id, data.delta])
+        conn.commit()
+        return {"ok": True}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+@app.get("/sp/reporte-ventas")
+def sp_reporte_ventas(start: str = "2025-01-01", end: str = "2025-12-31"):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "SELECT * FROM sp_generate_sales_report(%s::date, %s::date);",
+            [start, end],
+        )
+        rows = cursor.fetchall()
+        return [
+            {
+                "sale_id":   r[0],
+                "fecha":     str(r[1]),
+                "cliente":   r[2],
+                "empleado":  r[3],
+                "total":     float(r[4]),
+                "num_items": r[5],
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+@app.post("/sp/crear-cliente")
+def sp_crear_cliente(data: ClienteIn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        conn.autocommit = False
+        cursor.execute(
+            "CALL sp_create_customer(%s, %s, %s, NULL)",
+            [data.name, data.email, data.phone],
+        )
+        result = cursor.fetchone()
+        customer_id = result[0]
+        conn.commit()
+        return {"id": customer_id}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        conn.close()
+
+@app.post("/sp/cancelar-venta")
+def sp_cancelar_venta(data: SpCancelarIn):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        conn.autocommit = False
+        cursor.execute("CALL sp_cancel_sale(%s)", [data.sale_id])
+        conn.commit()
+        return {"ok": True}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()
