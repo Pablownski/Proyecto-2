@@ -4,7 +4,8 @@ CREATE TABLE usuario (
     user_id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
-    customer_id INT REFERENCES cliente(customer_id) ON DELETE SET NULL
+    customer_id INT REFERENCES cliente(customer_id) ON DELETE SET NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'customer'
 );
 
 CREATE TABLE sesion (
