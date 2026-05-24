@@ -16,6 +16,7 @@ docker compose up --build
 Esperar ~60 segundos a que los tres servicios estén listos.
 
 > Las credenciales fijas de calificación están en `.env.example`: usuario **proy3**, contraseña **secret**.
+> El proyecto corre exclusivamente en local — no hay despliegue en servidor.
 
 ---
 
@@ -139,13 +140,15 @@ Endpoints ORM disponibles en `/orm/*`:
 cp .env.example .env
 ```
 
-| Variable | Valor por defecto | Descripción |
+Los valores de `.env.example` funcionan directamente para desarrollo local — no es necesario modificar nada.
+
+| Variable | Valor | Descripción |
 |---|---|---|
 | `POSTGRES_USER` | `proy3` | Usuario PostgreSQL |
 | `POSTGRES_PASSWORD` | `secret` | Contraseña PostgreSQL |
 | `POSTGRES_DB` | `store` | Nombre de la base de datos |
-| `DB_HOST` | `db` | Host (no cambiar en Docker) |
-| `API_URL` | `http://backend:8000` | URL del backend (no cambiar en Docker) |
+| `DB_HOST` | `db` | Host de la DB (nombre del servicio Docker) |
+| `API_URL` | `http://backend:8000` | URL del backend dentro de Docker |
 | `SESSION_SECRET` | `supersecret` | Secreto para cookies de sesión |
 
 ---
