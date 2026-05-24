@@ -823,12 +823,11 @@ def sp_cancelar_venta(data: SpCancelarIn):
     conn = get_connection()
     cursor = conn.cursor()
     try:
-        conn.autocommit = False
+        # autocommit=True: el SP gestiona su propia transacción (COMMIT/ROLLBACK explícitos)
+        conn.autocommit = True
         cursor.execute("CALL sp_cancel_sale(%s)", [data.sale_id])
-        conn.commit()
         return {"ok": True}
     except Exception as e:
-        conn.rollback()
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         conn.close()

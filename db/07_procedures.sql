@@ -154,7 +154,9 @@ END;
 $$;
 
 -- ── 5. sp_cancel_sale ────────────────────────────────────────────────────────
--- Cancela una venta y restaura el stock de cada ítem
+-- Cancela una venta y restaura el stock de cada ítem.
+-- Gestiona su propia transacción: COMMIT en éxito, ROLLBACK explícito en error.
+-- Debe invocarse fuera de una transacción activa (autocommit=True en el caller).
 CREATE OR REPLACE PROCEDURE sp_cancel_sale(
     IN p_sale_id INT
 )
@@ -182,11 +184,13 @@ BEGIN
          WHERE product_id = v_detail.product_id;
     END LOOP;
 
-    -- Marcar como cancelada
+    -- Marcar como cancelada y confirmar la transacción
     UPDATE venta SET status = 'cancelled' WHERE sale_id = p_sale_id;
+    COMMIT;
 
 EXCEPTION
     WHEN OTHERS THEN
+        ROLLBACK;  -- transacción explícita: deshace los UPDATE de stock
         RAISE;
 END;
 $$;
